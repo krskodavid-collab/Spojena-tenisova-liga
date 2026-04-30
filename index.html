@@ -226,6 +226,27 @@
   }
   .pos.playoff { background: rgba(168, 225, 12, 0.18); color: var(--accent); }
   .pos.first { background: linear-gradient(135deg, var(--gold), #c79100); color: #0a0a0a; }
+  .pos.promote { background: rgba(34, 197, 94, 0.22); color: var(--green); }
+  .pos.relegate { background: rgba(239, 68, 68, 0.22); color: var(--red); }
+  tr.row-promote { background: rgba(34, 197, 94, 0.05); }
+  tr.row-promote:hover { background: rgba(34, 197, 94, 0.1) !important; }
+  tr.row-relegate { background: rgba(239, 68, 68, 0.05); }
+  tr.row-relegate:hover { background: rgba(239, 68, 68, 0.1) !important; }
+  tr.row-promote td:first-child::after, tr.row-relegate td:first-child::after { content: ''; }
+
+  .league-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border);
+    font-size: 12px;
+  }
+  .league-legend .lg-item { display: flex; align-items: center; gap: 6px; }
+  .league-legend .lg-promote { color: var(--green); font-weight: 700; }
+  .league-legend .lg-relegate { color: var(--red); font-weight: 700; }
+  .league-legend .lg-arrow { font-size: 14px; }
   .player-name { font-weight: 600; }
   .points { font-weight: 800; color: var(--accent); font-size: 16px; }
 
@@ -995,9 +1016,6 @@
       </div>
     </div>
     <div id="standingsContainer"></div>
-    <div class="legend">
-      <div class="legend-item"><span class="legend-dot playoff"></span>Postup do play-off (všetci hráči divízie)</div>
-    </div>
   </section>
 
   <!-- ===== ROZPIS ===== -->
@@ -1425,7 +1443,8 @@ function getDemoData() {
     propozicie: { text: getDefaultPropozicie(), pdfName: '' },
     photos: [],
     auth: { username: 'admin', passwordHash: simpleHash('stl2026') },
-    playoff: { generated: false, matches: [] }
+    playoff: { generated: false, matches: [] },
+    cycleHistory: {}
   };
   generateMatchesForCycle(data, 1);
 
@@ -1508,6 +1527,7 @@ function migrateData(d) {
   if (!d.roundDeadlines[2]) d.roundDeadlines[2] = {};
   d.info = d.info || { ihrisko: '', adresa: '', spravca: '', spravcaTel: '', otvHodiny: '', text: '' };
   d.organizers = d.organizers || [];
+  d.cycleHistory = d.cycleHistory || {};
   d.players.forEach(p => { if (typeof p.phone === 'undefined') p.phone = ''; });
   return d;
 }
@@ -1572,6 +1592,10 @@ function calcMatchOutcome(match) {
 }
 
 function calcStandings(division, cycleFilter) {
+  // Ak existuje snapshot pre minulý cyklus, použij ho (mrazené finálne tabuľky)
+  if (typeof cycleFilter === 'number' && DATA.cycleHistory?.[cycleFilter]?.finalStandings?.[division]) {
+    return DATA.cycleHistory[cycleFilter].finalStandings[division];
+  }
   // cycleFilter: 'season' (všetky cykly), alebo číslo
   const players = DATA.players.filter(p => p.division === division);
   const matches = DATA.matches.filter(m => {
@@ -1844,8 +1868,26 @@ function renderStandings() {
     sub.textContent = `Tabuľka za Cyklus ${mode} · bodovanie podľa setov`;
     document.getElementById('standingsModeBtn').innerHTML = mode === 1 ? `Cyklus <span id="cycleModeNum">2</span>` : `Sezóna spolu`;
   }
+  // Postupy/pády: aktívne iba počas cyklu 1 (po cykle 2 nasleduje play-off)
+  const showPromoRel = (DATA.cycle === 1) && (mode === 1 || mode === 'season');
+
   ['A', 'B', 'C'].forEach(div => {
     const standings = calcStandings(div, mode);
+    const promoteCount = showPromoRel && (div === 'B' || div === 'C') ? 2 : 0;
+    const relegateStart = showPromoRel && (div === 'A' || div === 'B') ? standings.length - 2 : -1;
+
+    let legendHtml = '';
+    if (showPromoRel) {
+      const parts = [];
+      if (div === 'A') parts.push('<span class="lg-item lg-relegate"><span class="lg-arrow">▼</span> Posledné 2 padajú do 2. ligy</span>');
+      if (div === 'B') {
+        parts.push('<span class="lg-item lg-promote"><span class="lg-arrow">▲</span> Prvé 2 postupujú do 1. ligy</span>');
+        parts.push('<span class="lg-item lg-relegate"><span class="lg-arrow">▼</span> Posledné 2 padajú do 3. ligy</span>');
+      }
+      if (div === 'C') parts.push('<span class="lg-item lg-promote"><span class="lg-arrow">▲</span> Prvé 2 postupujú do 2. ligy</span>');
+      legendHtml = `<div class="league-legend">${parts.join('')}</div>`;
+    }
+
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
@@ -1872,10 +1914,12 @@ function renderStandings() {
           </thead>
           <tbody>
             ${standings.map((s, i) => {
-              let posClass = 'playoff';
-              if (i === 0) posClass = 'first';
+              let posClass = '', rowClass = '';
+              if (i < promoteCount) { posClass = 'promote'; rowClass = 'row-promote'; }
+              else if (relegateStart >= 0 && i >= relegateStart) { posClass = 'relegate'; rowClass = 'row-relegate'; }
+              else if (i === 0 && !showPromoRel) posClass = 'first';
               return `
-                <tr style="cursor:pointer;" onclick="openProfile('${s.id}')">
+                <tr class="${rowClass}" style="cursor:pointer;" onclick="openProfile('${s.id}')">
                   <td class="center"><span class="pos ${posClass}">${i+1}</span></td>
                   <td><span class="player-name">${escapeHtml(s.name)}</span></td>
                   <td class="center">${s.played}</td>
@@ -1889,6 +1933,7 @@ function renderStandings() {
           </tbody>
         </table>
       </div>
+      ${legendHtml}
     `;
     wrap.appendChild(card);
   });
@@ -2436,18 +2481,33 @@ function renderAdminPlayers() {
 function renderAdminCycleControls() {
   const wrap = document.getElementById('cycleAdminButtons');
   const status = document.getElementById('cycleStatusText');
+  const hasHistory = !!(DATA.cycleHistory && DATA.cycleHistory[DATA.cycle - 1]);
   let buttons = '';
+  let statusHtml = '';
+
   if (DATA.cycle === 1) {
-    status.innerHTML = `Aktuálny stav: <strong style="color:var(--accent);">Cyklus 1 zo 2</strong>. Po skončení všetkých zápasov 1. cyklu klikni na "Spustiť cyklus 2".`;
-    buttons += `<button class="btn" onclick="startNextCycle()">Spustiť cyklus 2 →</button>`;
+    statusHtml = `Aktuálny stav: <strong style="color:var(--accent);">Cyklus 1 zo 2</strong>.<br>
+Po skončení 1. cyklu klikni na <strong>"Ukončiť cyklus 1"</strong> — uloží sa snapshot finálnych tabuliek (vždy si ich budeš vedieť pozrieť), aplikujú sa postupy/pády, vygeneruje sa rozpis pre cyklus 2.<br>
+<small style="color:var(--text-3);">Tlačidlo si pýta potvrdenie — uvidíš preview kto kam pôjde. Akciu vieš následne vrátiť späť.</small>`;
+    buttons += `<button class="btn" onclick="startNextCycle()">Ukončiť cyklus 1 a spustiť cyklus 2 →</button>`;
   } else if (DATA.cycle === 2 && !DATA.playoff.generated) {
-    status.innerHTML = `Aktuálny stav: <strong style="color:var(--accent);">Cyklus 2 zo 2</strong>. Po skončení všetkých zápasov klikni na "Spustiť play-off".`;
+    statusHtml = `Aktuálny stav: <strong style="color:var(--accent);">Cyklus 2 zo 2</strong>.<br>
+Po skončení všetkých zápasov klikni na <strong>"Spustiť play-off"</strong> — vygeneruje sa bracket podľa konečného poradia cyklu 2.`;
+    if (hasHistory) {
+      const dt = new Date(DATA.cycleHistory[DATA.cycle - 1].appliedAt).toLocaleString('sk-SK');
+      statusHtml += `<br><br><small style="color:var(--text-3);">📌 Posledný prechod (z cyklu ${DATA.cycle - 1} → ${DATA.cycle}) bol vykonaný: ${dt}. Vieš ho vrátiť tlačidlom nižšie.</small>`;
+    }
     buttons += `<button class="btn" onclick="startPlayoff()">🏆 Spustiť play-off →</button>`;
+    if (hasHistory) {
+      buttons += `<button class="btn secondary" onclick="revertCycleTransition()">↶ Vrátiť posledný prechod (späť na cyklus ${DATA.cycle - 1})</button>`;
+    }
   } else if (DATA.playoff.generated) {
-    status.innerHTML = `Aktuálny stav: <strong style="color:var(--accent);">Play-off prebieha</strong>. Po jeho skončení môžeš začať novú sezónu.`;
+    statusHtml = `Aktuálny stav: <strong style="color:var(--accent);">Play-off prebieha</strong>. Po jeho skončení môžeš začať novú sezónu.`;
     buttons += `<button class="btn secondary" onclick="resetPlayoff()">Zrušiť play-off</button>`;
   }
   buttons += `<button class="btn secondary" onclick="regenerateSchedule()">Pre-generovať rozpis cyklu ${DATA.cycle}</button>`;
+
+  status.innerHTML = statusHtml;
   wrap.innerHTML = buttons;
 }
 function addNewPlayer() {
@@ -2490,20 +2550,112 @@ function saveCredentials() {
 }
 
 /* ---------- CYKLY & PLAY-OFF ---------- */
-function startNextCycle() {
+async function startNextCycle() {
   if (!isLoggedIn()) return;
   if (DATA.cycle >= DATA.seasonCycles) {
     showToast('Sezóna má max ' + DATA.seasonCycles + ' cykly', 'error'); return;
   }
-  if (!confirm(`Spustiť cyklus ${DATA.cycle + 1}? (hráči zostávajú v rovnakých ligách, vygeneruje sa nový rozpis)`)) return;
+  const standA = calcStandings('A', DATA.cycle);
+  const standB = calcStandings('B', DATA.cycle);
+  const standC = calcStandings('C', DATA.cycle);
+  const promoText = `UKONČIŤ CYKLUS ${DATA.cycle} A SPUSTIŤ CYKLUS ${DATA.cycle + 1}?
+
+Aktuálne poradie sa zafrieze ako finálne pre cyklus ${DATA.cycle} (vždy si ho budeš vedieť pozrieť).
+
+Aplikujú sa postupy a pády:
+
+▼ Z 1. ligy padajú do 2. ligy:
+   ${standA.slice(-2).map((p,i) => `${standA.length-1+i}. ${p.name}`).join('\n   ')}
+
+▲ Z 2. ligy postupujú do 1. ligy:
+   ${standB.slice(0,2).map((p,i) => `${i+1}. ${p.name}`).join('\n   ')}
+
+▼ Z 2. ligy padajú do 3. ligy:
+   ${standB.slice(-2).map((p,i) => `${standB.length-1+i}. ${p.name}`).join('\n   ')}
+
+▲ Z 3. ligy postupujú do 2. ligy:
+   ${standC.slice(0,2).map((p,i) => `${i+1}. ${p.name}`).join('\n   ')}
+
+Body sa resetujú a vygeneruje sa nový rozpis.
+
+⤺ Akciu vieš vrátiť späť tlačidlom "Vrátiť posledný prechod" v admin paneli.`;
+  if (!confirm(promoText)) return;
+
+  // SNAPSHOT — ulož finálne tabuľky aj pôvodné divízie hráčov
+  const playerDivisionsBefore = {};
+  DATA.players.forEach(p => playerDivisionsBefore[p.id] = p.division);
+  if (!DATA.cycleHistory) DATA.cycleHistory = {};
+  DATA.cycleHistory[DATA.cycle] = {
+    appliedAt: new Date().toISOString(),
+    finalStandings: {
+      A: standA.map(s => { const c = {...s}; delete c.h2h; return c; }),
+      B: standB.map(s => { const c = {...s}; delete c.h2h; return c; }),
+      C: standC.map(s => { const c = {...s}; delete c.h2h; return c; })
+    },
+    playerDivisionsBefore,
+    promotions: {
+      aDown: standA.slice(-2).map(p => p.id),
+      bUp: standB.slice(0, 2).map(p => p.id),
+      bDown: standB.slice(-2).map(p => p.id),
+      cUp: standC.slice(0, 2).map(p => p.id)
+    }
+  };
+
+  // Aplikuj postupy/pády
+  standA.slice(-2).forEach(p => { const pl = playerById(p.id); if (pl) pl.division = 'B'; });
+  standB.slice(0, 2).forEach(p => { const pl = playerById(p.id); if (pl) pl.division = 'A'; });
+  standB.slice(-2).forEach(p => { const pl = playerById(p.id); if (pl) pl.division = 'C'; });
+  standC.slice(0, 2).forEach(p => { const pl = playerById(p.id); if (pl) pl.division = 'B'; });
+
   DATA.cycle++;
   generateMatchesForCycle(DATA, DATA.cycle);
   if (!DATA.cycleDeadlines[DATA.cycle]) {
     const d = new Date(); d.setDate(d.getDate() + 60);
     DATA.cycleDeadlines[DATA.cycle] = d.toISOString().slice(0, 10);
   }
-  saveData(); render(); showToast(`Spustený cyklus ${DATA.cycle}`);
+  await saveData();
   scheduleCycle = DATA.cycle;
+  render();
+  showToast(`✓ Spustený cyklus ${DATA.cycle}, postupy aplikované`);
+}
+
+async function revertCycleTransition() {
+  if (!isLoggedIn()) return;
+  const prevCycle = DATA.cycle - 1;
+  if (prevCycle < 1) { showToast('Nie je čo vrátiť', 'error'); return; }
+  const history = DATA.cycleHistory?.[prevCycle];
+  if (!history) { showToast('Snapshot pre vrátenie nie je dostupný', 'error'); return; }
+
+  const playedInCurrent = DATA.matches.filter(m => m.cycle === DATA.cycle && m.sets && m.sets.length > 0).length;
+  const warning = playedInCurrent > 0
+    ? `\n\n⚠ POZOR: V cykle ${DATA.cycle} je už ${playedInCurrent} odohraných zápasov — STRATIA SA!`
+    : '';
+
+  if (!confirm(`Vrátiť posledný prechod cyklu (z cyklu ${DATA.cycle} späť na ${prevCycle})?
+
+Toto vráti:
+• Hráčov do ich pôvodných líg (pred postupmi/pádmi)
+• Vymaže celý rozpis cyklu ${DATA.cycle}
+• Vráti aktuálny cyklus na ${prevCycle}${warning}`)) return;
+
+  // Obnov pôvodné divízie hráčov
+  Object.entries(history.playerDivisionsBefore).forEach(([id, div]) => {
+    const p = playerById(id);
+    if (p) p.division = div;
+  });
+  // Vymaž matche aktuálneho cyklu
+  DATA.matches = DATA.matches.filter(m => m.cycle !== DATA.cycle);
+  // Vymaž play-off ak existuje (lebo bolo viazané na zostavu po prechode)
+  DATA.playoff = { generated: false, matches: [] };
+  // Vráť cyklus
+  DATA.cycle = prevCycle;
+  scheduleCycle = prevCycle;
+  // Vymaž snapshot — vrátili sme sa pred prechod
+  delete DATA.cycleHistory[prevCycle];
+
+  await saveData();
+  render();
+  showToast(`↶ Vrátené na cyklus ${prevCycle}`);
 }
 function startPlayoff() {
   if (!isLoggedIn()) return;
@@ -2659,6 +2811,7 @@ function dataToCloud(data) {
   delete cloud.photos;
   cloud.matches = JSON.stringify(data.matches || []);
   cloud.playoff = JSON.stringify(data.playoff || { generated: false, matches: [] });
+  cloud.cycleHistory = JSON.stringify(data.cycleHistory || {});
   return cloud;
 }
 function dataFromCloud(cloud) {
@@ -2667,6 +2820,8 @@ function dataFromCloud(cloud) {
   catch { d.matches = []; }
   try { d.playoff = typeof cloud.playoff === 'string' ? JSON.parse(cloud.playoff) : (cloud.playoff || { generated: false, matches: [] }); }
   catch { d.playoff = { generated: false, matches: [] }; }
+  try { d.cycleHistory = typeof cloud.cycleHistory === 'string' ? JSON.parse(cloud.cycleHistory) : (cloud.cycleHistory || {}); }
+  catch { d.cycleHistory = {}; }
   return d;
 }
 
