@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spojená tenisová liga</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<style>
+  /* ===== RESET & BASE ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0e1a;
+    --bg-2: #0f1424;
+    --card: #131826;
+    --card-2: #1a2030;
+    --border: #232a3d;
+    --border-2: #2c3548;
+    --text: #e5e7eb;
+    --text-2: #9ca3af;
+    --text-3: #6b7280;
+    --accent: #a8e10c;
+    --accent-2: #d9ff3d;
+    --accent-3: #5d8a00;
+    --green: #10b981;
+    --red: #ef4444;
+    --yellow: #fbbf24;
+    --blue: #3b82f6;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    --radius: 12px;
+  }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    background: radial-gradient(ellipse at top, #0f1424 0%, var(--bg) 60%);
+    color: var(--text);
+    line-height: 1.5;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ===== LAYOUT ===== */
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+  /* ===== HEADER ===== */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 20px 0;
+    background: rgba(10,14,26,0.85);
+    backdrop-filter: blur(8px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .brand-logo { width: 48px; height: 48px; }
+  .brand-text h1 { font-size: 18px; font-weight: 800; letter-spacing: 0.5px; line-height: 1.1; }
+  .brand-text p { font-size: 12px; color: var(--accent); letter-spacing: 2px; font-weight: 600; text-transform: uppercase; }
+  .cycle-badge {
+    background: linear-gradient(135deg, var(--accent-3), var(--accent));
+    color: #0a0e1a;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 13px;
+    box-shadow: 0 0 20px rgba(168, 225, 12, 0.3);
+  }
+
+  /* ===== NAVIGATION TABS ===== */
+  nav.tabs {
+    display: flex;
+    gap: 4px;
+    margin: 24px 0;
+    background: var(--card);
+    padding: 6px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .tab-btn {
+    flex: 1;
+    min-width: 110px;
+    padding: 10px 16px;
+    background: transparent;
+    border: none;
+    color: var(--text-2);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .tab-btn:hover { color: var(--text); background: var(--card-2); }
+  .tab-btn.active {
+    background: linear-gradient(135deg, var(--accent), var(--accent-3));
+    color: #0a0e1a;
+    box-shadow: 0 4px 12px rgba(168, 225, 12, 0.25);
+  }
+
+  /* ===== SECTIONS ===== */
+  section.view { display: none; animation: fadeIn 0.25s ease; }
+  section.view.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+  .view-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .view-header h2 { font-size: 22px; font-weight: 800; }
+  .view-header p { color: var(--text-2); font-size: 14px; }
+
+  /* ===== CARDS ===== */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .card-title {
+    font-size: 16px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .division-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 16px;
+  }
+  .div-A { background: linear-gradient(135deg, #d9ff3d, #a8e10c); color: #0a0e1a; }
+  .div-B { background: linear-gradient(135deg, #38bdf8, #0284c7); color: #0a0e1a; }
+  .div-C { background: linear-gradient(135deg, #f59e0b, #b45309); color: #0a0e1a; }
+
+  /* ===== TABLES ===== */
+  .table-wrap { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  th {
+    text-align: left;
+    padding: 10px 12px;
+    font-weight: 600;
+    color: var(--text-2);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  th.center, td.center { text-align: center; }
+  td {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  tr:last-child td { border-bottom: none; }
+  tbody tr { transition: background 0.1s; }
+  tbody tr:hover { background: var(--card-2); }
+
+  .pos {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--card-2);
+    font-weight: 700;
+    font-size: 13px;
+  }
+  .pos.promote { background: rgba(16, 185, 129, 0.18); color: var(--green); }
+  .pos.relegate { background: rgba(239, 68, 68, 0.18); color: var(--red); }
+  .player-name { font-weight: 600; }
+  .points { font-weight: 800; color: var(--accent); font-size: 16px; }
+
+  /* ===== STAT GRID ===== */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+  }
+  .stat-label { color: var(--text-2); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+  .stat-value { font-size: 28px; font-weight: 800; color: var(--accent); }
+  .stat-sub { color: var(--text-2); font-size: 13px; margin-top: 4px; }
+
+  /* ===== MATCH LIST ===== */
+  .match-row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+  .match-row:last-child { border-bottom: none; }
+  .match-row:hover { background: var(--card-2); }
+  .match-row.played { cursor: default; }
+  .match-row.pending { cursor: pointer; }
+  .match-row.pending:hover .add-btn { background: var(--accent); color: #0a0e1a; }
+
+  .player-side { font-weight: 600; }
+  .player-side.left { text-align: right; }
+  .player-side.right { text-align: left; }
+  .player-side .winner { color: var(--accent); }
+  .player-side .loser { color: var(--text-2); }
+
+  .score-box {
+    background: var(--card-2);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 15px;
+    min-width: 60px;
+    text-align: center;
+  }
+  .score-box.empty { color: var(--text-3); font-weight: 500; font-size: 12px; }
+  .add-btn {
+    background: var(--card-2);
+    border: 1px solid var(--border-2);
+    color: var(--accent);
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    transition: all 0.15s;
+  }
+
+  .games-detail { color: var(--text-2); font-size: 12px; margin-top: 2px; }
+
+  /* ===== BUTTONS ===== */
+  .btn {
+    background: var(--accent);
+    color: #0a0e1a;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(168,225,12,0.3); }
+  .btn.secondary { background: var(--card-2); color: var(--text); border: 1px solid var(--border-2); }
+  .btn.secondary:hover { background: var(--border); box-shadow: none; }
+  .btn.danger { background: var(--red); color: white; }
+  .btn.small { padding: 6px 12px; font-size: 12px; }
+
+  /* ===== MODAL ===== */
+  .modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    padding: 20px;
+    backdrop-filter: blur(4px);
+  }
+  .modal-backdrop.active { display: flex; }
+  .modal {
+    background: var(--card);
+    border: 1px solid var(--border-2);
+    border-radius: var(--radius);
+    padding: 24px;
+    max-width: 480px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 16px; }
+  .modal-close {
+    float: right;
+    background: transparent;
+    border: none;
+    color: var(--text-2);
+    font-size: 24px;
+    cursor: pointer;
+    line-height: 1;
+  }
+  .modal-close:hover { color: var(--text); }
+
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 13px; color: var(--text-2); margin-bottom: 6px; font-weight: 600; }
+  .form-group input, .form-group select {
+    width: 100%;
+    background: var(--bg-2);
+    border: 1px solid var(--border-2);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+  }
+  .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--accent); }
+
+  .vs-row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: end;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .vs-label { color: var(--text-2); font-weight: 700; padding: 0 8px 12px; }
+
+  .set-row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .set-row input { text-align: center; }
+  .set-label { color: var(--text-2); font-size: 13px; padding: 0 8px; }
+
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+
+  /* ===== ADMIN ===== */
+  .admin-section { margin-bottom: 24px; }
+  .player-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 8px;
+    border-radius: 6px;
+    margin-bottom: 4px;
+  }
+  .player-row:hover { background: var(--card-2); }
+  .player-row input { flex: 1; }
+  .player-row select { width: 80px; }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--card);
+    border: 1px solid var(--accent);
+    color: var(--text);
+    padding: 14px 20px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    z-index: 300;
+    font-weight: 600;
+    font-size: 14px;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.error { border-color: var(--red); }
+
+  /* ===== FOOTER ===== */
+  footer {
+    margin-top: 40px;
+    padding: 24px 0;
+    text-align: center;
+    color: var(--text-3);
+    font-size: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 600px) {
+    .brand-text h1 { font-size: 16px; }
+    .brand-text p { font-size: 10px; }
+    .view-header h2 { font-size: 18px; }
+    .stat-value { font-size: 22px; }
+    .match-row { grid-template-columns: 1fr; gap: 6px; text-align: center; }
+    .player-side.left, .player-side.right { text-align: center; }
+    th, td { padding: 8px 6px; font-size: 13px; }
+    th.hide-sm, td.hide-sm { display: none; }
+  }
+
+  /* ===== EMPTY ===== */
+  .empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-2);
+  }
+  .empty-icon { font-size: 40px; margin-bottom: 8px; opacity: 0.5; }
+
+  /* ===== LEGEND ===== */
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--text-2); margin-top: 12px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .legend-dot.promote { background: var(--green); }
+  .legend-dot.relegate { background: var(--red); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container header-inner">
+    <div class="brand">
+      <svg class="brand-logo" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="hg" cx="35%" cy="35%" r="70%">
+            <stop offset="0%" stop-color="#d9ff3d"/>
+            <stop offset="60%" stop-color="#a8e10c"/>
+            <stop offset="100%" stop-color="#5d8a00"/>
+          </radialGradient>
+        </defs>
+        <g transform="translate(32,32)">
+          <circle r="28" fill="url(#hg)"/>
+          <path d="M -25,-11 Q -6,-28 14,-26 Q 24,-25 28,-13" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path d="M -28,13 Q -12,25 4,26 Q 19,28 25,11" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        </g>
+      </svg>
+      <div class="brand-text">
+        <h1>SPOJENÁ TENISOVÁ LIGA</h1>
+        <p>Sezóna · Cyklus <span id="cycleHeaderNum">1</span></p>
+      </div>
+    </div>
+    <div class="cycle-badge">
+      <span id="totalMatchesPlayed">0</span> z <span id="totalMatchesScheduled">0</span> zápasov
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="standings">Tabuľky</button>
+    <button class="tab-btn" data-tab="schedule">Rozpis</button>
+    <button class="tab-btn" data-tab="results">Výsledky</button>
+    <button class="tab-btn" data-tab="stats">Štatistiky</button>
+    <button class="tab-btn" data-tab="admin">Admin</button>
+  </nav>
+
+  <!-- ===== TABUĽKY ===== -->
+  <section id="view-standings" class="view active">
+    <div class="view-header">
+      <div>
+        <h2>Tabuľky divízií</h2>
+        <p>Cyklus <span class="cycle-num">1</span> · bodovanie podľa setov (2:0 → 3 b., 2:1 → 2 b., porazený 2:1 → 1 b.)</p>
+      </div>
+    </div>
+    <div id="standingsContainer"></div>
+    <div class="legend">
+      <div class="legend-item"><span class="legend-dot promote"></span>Postup do vyššej divízie</div>
+      <div class="legend-item"><span class="legend-dot relegate"></span>Pád do nižšej divízie</div>
+    </div>
+  </section>
+
+  <!-- ===== ROZPIS ===== -->
+  <section id="view-schedule" class="view">
+    <div class="view-header">
+      <div>
+        <h2>Rozpis zápasov</h2>
+        <p>Klikni na zápas a pridaj výsledok</p>
+      </div>
+    </div>
+    <div id="scheduleContainer"></div>
+  </section>
+
+  <!-- ===== VÝSLEDKY ===== -->
+  <section id="view-results" class="view">
+    <div class="view-header">
+      <div>
+        <h2>Posledné výsledky</h2>
+        <p>Chronologický zoznam odohraných zápasov</p>
+      </div>
+    </div>
+    <div class="card">
+      <div id="resultsContainer"></div>
+    </div>
+  </section>
+
+  <!-- ===== ŠTATISTIKY ===== -->
+  <section id="view-stats" class="view">
+    <div class="view-header">
+      <div>
+        <h2>Štatistiky ligy</h2>
+        <p>Najlepší hráči a celkové čísla</p>
+      </div>
+    </div>
+    <div class="stat-grid" id="statGrid"></div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Top 10 — najviac víťazstiev</div></div>
+      <div id="topWinners"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">Top 10 — najlepšia úspešnosť (min. 3 zápasy)</div></div>
+      <div id="topWinrate"></div>
+    </div>
+  </section>
+
+  <!-- ===== ADMIN ===== -->
+  <section id="view-admin" class="view">
+    <div class="view-header">
+      <div>
+        <h2>Admin</h2>
+        <p>Správa hráčov, cyklov, dáta</p>
+      </div>
+    </div>
+
+    <div class="card admin-section">
+      <div class="card-header">
+        <div class="card-title">Hráči a divízie</div>
+        <div>
+          <button class="btn small secondary" onclick="addNewPlayer()">+ Pridať hráča</button>
+        </div>
+      </div>
+      <div id="playersList"></div>
+      <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="btn small" onclick="savePlayers()">Uložiť zmeny</button>
+        <button class="btn small secondary" onclick="render()">Zrušiť</button>
+      </div>
+    </div>
+
+    <div class="card admin-section">
+      <div class="card-header"><div class="card-title">Cyklus</div></div>
+      <p style="color:var(--text-2); font-size:14px; margin-bottom:12px;">
+        Aktuálny cyklus: <strong style="color:var(--accent);">Cyklus <span class="cycle-num">1</span></strong>.
+        Po skončení cyklu sa automaticky aplikujú postupy/pády (z A padá posledných 2, z B postupujú prví 2 a padajú poslední 2, z C postupujú prví 2).
+      </p>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="btn" onclick="advanceCycle()">Ukončiť cyklus a aplikovať postupy →</button>
+        <button class="btn secondary" onclick="regenerateSchedule()">Pre-generovať rozpis</button>
+      </div>
+    </div>
+
+    <div class="card admin-section">
+      <div class="card-header"><div class="card-title">Dáta</div></div>
+      <p style="color:var(--text-2); font-size:14px; margin-bottom:12px;">
+        Dáta sú uložené v tvojom prehliadači (localStorage). Pre zálohu si exportuj JSON súbor.
+      </p>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="btn secondary" onclick="exportData()">⬇ Export JSON</button>
+        <label class="btn secondary" style="cursor:pointer;">
+          ⬆ Import JSON
+          <input type="file" accept=".json" style="display:none;" onchange="importData(event)">
+        </label>
+        <button class="btn danger" onclick="resetAll()">Vynulovať všetko (demo dáta)</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Spojená tenisová liga · vytvorené pre amatérsku ligu · dáta v localStorage prehliadača
+  </footer>
+</div>
+
+<!-- ===== MODAL: Pridať/upraviť výsledok ===== -->
+<div class="modal-backdrop" id="resultModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <div class="modal-title" id="modalTitle">Pridať výsledok</div>
+
+    <div class="vs-row">
+      <div style="text-align:right; font-weight:700;" id="modalP1Name">—</div>
+      <div class="vs-label">vs</div>
+      <div style="text-align:left; font-weight:700;" id="modalP2Name">—</div>
+    </div>
+
+    <div class="form-group">
+      <label>Sety (zadaj gemy v každom sete)</label>
+      <div class="set-row">
+        <input type="number" min="0" max="7" id="set1p1" placeholder="6">
+        <span class="set-label">: 1. set :</span>
+        <input type="number" min="0" max="7" id="set1p2" placeholder="4">
+      </div>
+      <div class="set-row">
+        <input type="number" min="0" max="7" id="set2p1" placeholder="6">
+        <span class="set-label">: 2. set :</span>
+        <input type="number" min="0" max="7" id="set2p2" placeholder="3">
+      </div>
+      <div class="set-row">
+        <input type="number" min="0" max="10" id="set3p1" placeholder="—">
+        <span class="set-label">: 3. set :</span>
+        <input type="number" min="0" max="10" id="set3p2" placeholder="—">
+      </div>
+      <p style="color:var(--text-3); font-size:12px; margin-top:6px;">3. set vyplň iba ak sa hral (super tie-break = napr. 10:8)</p>
+    </div>
+
+    <div class="form-group">
+      <label>Dátum</label>
+      <input type="date" id="matchDate">
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn danger small" id="deleteResultBtn" style="display:none; margin-right:auto;" onclick="deleteResult()">Vymazať výsledok</button>
+      <button class="btn secondary" onclick="closeModal()">Zrušiť</button>
+      <button class="btn" onclick="saveResult()">Uložiť výsledok</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   SPOJENÁ TENISOVÁ LIGA — logika
+   ============================================================ */
+
+const STORAGE_KEY = 'stl_data_v1';
+let DATA = null;
+let CURRENT_MATCH_ID = null;
+
+/* ---------- DEMO DÁTA ---------- */
+function getDemoData() {
+  const players = [
+    // A divízia (7)
+    { id: 'p1', name: 'Adam Kováč',     division: 'A' },
+    { id: 'p2', name: 'Boris Novák',    division: 'A' },
+    { id: 'p3', name: 'Cyril Horváth',  division: 'A' },
+    { id: 'p4', name: 'Dalibor Varga',  division: 'A' },
+    { id: 'p5', name: 'Eduard Tóth',    division: 'A' },
+    { id: 'p6', name: 'Filip Baláž',    division: 'A' },
+    { id: 'p7', name: 'Gabriel Molnár', division: 'A' },
+    // B divízia (7)
+    { id: 'p8',  name: 'Hugo Polák',    division: 'B' },
+    { id: 'p9',  name: 'Igor Šimko',    division: 'B' },
+    { id: 'p10', name: 'Ján Hrnčiar',   division: 'B' },
+    { id: 'p11', name: 'Karol Vlček',   division: 'B' },
+    { id: 'p12', name: 'Lukáš Daniel',  division: 'B' },
+    { id: 'p13', name: 'Marek Beňo',    division: 'B' },
+    { id: 'p14', name: 'Norbert Krajči',division: 'B' },
+    // C divízia (6)
+    { id: 'p15', name: 'Oliver Žilka',  division: 'C' },
+    { id: 'p16', name: 'Pavol Mráz',    division: 'C' },
+    { id: 'p17', name: 'Roman Sečka',   division: 'C' },
+    { id: 'p18', name: 'Samuel Bíro',   division: 'C' },
+    { id: 'p19', name: 'Tomáš Petrík',  division: 'C' },
+    { id: 'p20', name: 'Viktor Lacko',  division: 'C' }
+  ];
+
+  const data = {
+    cycle: 1,
+    players,
+    matches: []
+  };
+
+  // Vygeneruj rozpis pre cyklus 1
+  generateMatchesForCycle(data, 1);
+
+  // Pár demo výsledkov
+  const seed = [
+    // A divízia výsledky
+    { p1Id: 'p1', p2Id: 'p2', sets: [[6,4],[6,3]] },
+    { p1Id: 'p3', p2Id: 'p4', sets: [[6,2],[6,4]] },
+    { p1Id: 'p5', p2Id: 'p6', sets: [[4,6],[6,4],[10,8]] },
+    { p1Id: 'p1', p2Id: 'p7', sets: [[6,1],[6,2]] },
+    { p1Id: 'p2', p2Id: 'p3', sets: [[7,5],[3,6],[10,7]] },
+    // B divízia
+    { p1Id: 'p8', p2Id: 'p9', sets: [[6,4],[6,2]] },
+    { p1Id: 'p10', p2Id: 'p11', sets: [[5,7],[6,3],[10,6]] },
+    { p1Id: 'p12', p2Id: 'p13', sets: [[6,3],[6,4]] },
+    // C divízia
+    { p1Id: 'p15', p2Id: 'p16', sets: [[6,2],[6,1]] },
+    { p1Id: 'p17', p2Id: 'p18', sets: [[7,6],[6,4]] }
+  ];
+  const today = new Date();
+  seed.forEach((s, i) => {
+    const match = data.matches.find(m =>
+      (m.p1Id === s.p1Id && m.p2Id === s.p2Id) ||
+      (m.p1Id === s.p2Id && m.p2Id === s.p1Id)
+    );
+    if (match) {
+      // Normalizuj poradie skóre podľa toho ako je match uložený
+      const swap = match.p1Id !== s.p1Id;
+      match.sets = s.sets.map(set => swap ? [set[1], set[0]] : set);
+      const d = new Date(today); d.setDate(today.getDate() - (seed.length - i));
+      match.date = d.toISOString().slice(0,10);
+    }
+  });
+
+  return data;
+}
+
+/* ---------- ROUND-ROBIN GENERATOR (Berger / circle method) ---------- */
+function generateRoundRobin(playerIds) {
+  const n = playerIds.length;
+  const isOdd = n % 2 === 1;
+  const arr = isOdd ? [...playerIds, null] : [...playerIds];
+  const rounds = arr.length - 1;
+  const halfSize = arr.length / 2;
+  const fixed = arr[0];
+  let rotating = arr.slice(1);
+  const matches = [];
+
+  for (let r = 0; r < rounds; r++) {
+    const roundOrder = [fixed, ...rotating];
+    for (let i = 0; i < halfSize; i++) {
+      const a = roundOrder[i];
+      const b = roundOrder[arr.length - 1 - i];
+      if (a !== null && b !== null) {
+        matches.push({ p1Id: a, p2Id: b, round: r + 1 });
+      }
+    }
+    rotating = [rotating[rotating.length - 1], ...rotating.slice(0, -1)];
+  }
+  return matches;
+}
+
+function generateMatchesForCycle(data, cycle) {
+  // Odstráň existujúce zápasy daného cyklu
+  data.matches = data.matches.filter(m => m.cycle !== cycle);
+
+  ['A', 'B', 'C'].forEach(div => {
+    const playerIds = data.players.filter(p => p.division === div).map(p => p.id);
+    if (playerIds.length < 2) return;
+    const rrMatches = generateRoundRobin(playerIds);
+    rrMatches.forEach((m, idx) => {
+      data.matches.push({
+        id: `c${cycle}-${div}-${idx}`,
+        cycle,
+        division: div,
+        round: m.round,
+        p1Id: m.p1Id,
+        p2Id: m.p2Id,
+        sets: null,
+        date: null
+      });
+    });
+  });
+}
+
+/* ---------- BODOVANIE ---------- */
+function calcMatchOutcome(match) {
+  if (!match.sets || match.sets.length === 0) return null;
+  let sets1 = 0, sets2 = 0, games1 = 0, games2 = 0;
+  match.sets.forEach(([g1, g2]) => {
+    if (g1 == null || g2 == null) return;
+    games1 += g1;
+    games2 += g2;
+    if (g1 > g2) sets1++; else if (g2 > g1) sets2++;
+  });
+  if (sets1 === 0 && sets2 === 0) return null;
+  const winnerIs1 = sets1 > sets2;
+  // Bodovanie podľa setov: 2:0 → 3+0, 2:1 → 2+1
+  let pts1, pts2;
+  if (sets1 === 2 && sets2 === 0) { pts1 = 3; pts2 = 0; }
+  else if (sets1 === 0 && sets2 === 2) { pts1 = 0; pts2 = 3; }
+  else if (sets1 === 2 && sets2 === 1) { pts1 = 2; pts2 = 1; }
+  else if (sets1 === 1 && sets2 === 2) { pts1 = 1; pts2 = 2; }
+  else { pts1 = winnerIs1 ? 2 : 1; pts2 = winnerIs1 ? 1 : 2; } // fallback
+  return { sets1, sets2, games1, games2, pts1, pts2, winnerIs1 };
+}
+
+function calcStandings(division, cycle) {
+  const players = DATA.players.filter(p => p.division === division);
+  const matches = DATA.matches.filter(m => m.division === division && m.cycle === cycle);
+
+  const stats = {};
+  players.forEach(p => {
+    stats[p.id] = {
+      id: p.id, name: p.name,
+      played: 0, wins: 0, losses: 0,
+      setsW: 0, setsL: 0, gamesW: 0, gamesL: 0,
+      points: 0,
+      h2h: {} // proti komu kolko bodov
+    };
+  });
+
+  matches.forEach(m => {
+    const out = calcMatchOutcome(m);
+    if (!out) return;
+    const s1 = stats[m.p1Id], s2 = stats[m.p2Id];
+    if (!s1 || !s2) return;
+    s1.played++; s2.played++;
+    s1.setsW += out.sets1; s1.setsL += out.sets2;
+    s2.setsW += out.sets2; s2.setsL += out.sets1;
+    s1.gamesW += out.games1; s1.gamesL += out.games2;
+    s2.gamesW += out.games2; s2.gamesL += out.games1;
+    s1.points += out.pts1; s2.points += out.pts2;
+    if (out.winnerIs1) { s1.wins++; s2.losses++; }
+    else { s2.wins++; s1.losses++; }
+    s1.h2h[m.p2Id] = (s1.h2h[m.p2Id] || 0) + out.pts1;
+    s2.h2h[m.p1Id] = (s2.h2h[m.p1Id] || 0) + out.pts2;
+  });
+
+  // Tie-break: 1) body, 2) vzájomný zápas, 3) rozdiel setov, 4) rozdiel gemov, 5) abeceda
+  const arr = Object.values(stats);
+  arr.sort((a, b) => {
+    if (b.points !== a.points) return b.points - a.points;
+    // vzájomný zápas
+    const aVsB = a.h2h[b.id] || 0;
+    const bVsA = b.h2h[a.id] || 0;
+    if (aVsB !== bVsA) return bVsA - aVsB;
+    const setDiffA = a.setsW - a.setsL;
+    const setDiffB = b.setsW - b.setsL;
+    if (setDiffB !== setDiffA) return setDiffB - setDiffA;
+    const gameDiffA = a.gamesW - a.gamesL;
+    const gameDiffB = b.gamesW - b.gamesL;
+    if (gameDiffB !== gameDiffA) return gameDiffB - gameDiffA;
+    return a.name.localeCompare(b.name);
+  });
+  return arr;
+}
+
+/* ---------- RENDER: TABUĽKY ---------- */
+function renderStandings() {
+  const wrap = document.getElementById('standingsContainer');
+  wrap.innerHTML = '';
+  ['A', 'B', 'C'].forEach(div => {
+    const standings = calcStandings(div, DATA.cycle);
+    const isC = div === 'C';
+    const promoteCount = (div === 'B' || div === 'C') ? 2 : 0;
+    const relegateStart = (div === 'A') ? standings.length - 2 : (div === 'B') ? standings.length - 2 : -1;
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-header">
+        <div class="card-title">
+          <span class="division-tag div-${div}">${div}</span>
+          <span>Divízia ${div}</span>
+          <span style="color:var(--text-2); font-weight:500; font-size:13px;">· ${standings.length} hráčov</span>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="center">#</th>
+              <th>Hráč</th>
+              <th class="center">Z</th>
+              <th class="center">V</th>
+              <th class="center">P</th>
+              <th class="center hide-sm">Sety</th>
+              <th class="center hide-sm">Gemy</th>
+              <th class="center">Body</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${standings.map((s, i) => {
+              let posClass = '';
+              if (i < promoteCount) posClass = 'promote';
+              else if (relegateStart >= 0 && i >= relegateStart) posClass = 'relegate';
+              return `
+                <tr>
+                  <td class="center"><span class="pos ${posClass}">${i+1}</span></td>
+                  <td><span class="player-name">${escapeHtml(s.name)}</span></td>
+                  <td class="center">${s.played}</td>
+                  <td class="center" style="color:var(--green);">${s.wins}</td>
+                  <td class="center" style="color:var(--red);">${s.losses}</td>
+                  <td class="center hide-sm">${s.setsW}:${s.setsL}</td>
+                  <td class="center hide-sm">${s.gamesW}:${s.gamesL}</td>
+                  <td class="center"><span class="points">${s.points}</span></td>
+                </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+    wrap.appendChild(card);
+  });
+}
+
+/* ---------- RENDER: ROZPIS ---------- */
+function renderSchedule() {
+  const wrap = document.getElementById('scheduleContainer');
+  wrap.innerHTML = '';
+  ['A', 'B', 'C'].forEach(div => {
+    const matches = DATA.matches
+      .filter(m => m.division === div && m.cycle === DATA.cycle)
+      .sort((a, b) => (a.round || 0) - (b.round || 0));
+    if (matches.length === 0) return;
+
+    const playedCount = matches.filter(m => m.sets && m.sets.length > 0).length;
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-header">
+        <div class="card-title">
+          <span class="division-tag div-${div}">${div}</span>
+          <span>Divízia ${div}</span>
+        </div>
+        <div style="color:var(--text-2); font-size:13px;">${playedCount} / ${matches.length} odohraných</div>
+      </div>
+      <div id="sched-${div}"></div>
+    `;
+    wrap.appendChild(card);
+    const inner = card.querySelector(`#sched-${div}`);
+
+    let lastRound = null;
+    matches.forEach(m => {
+      if (m.round !== lastRound) {
+        const rh = document.createElement('div');
+        rh.style.cssText = 'padding:10px 12px; color:var(--text-2); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid var(--border);';
+        rh.textContent = `Kolo ${m.round}`;
+        inner.appendChild(rh);
+        lastRound = m.round;
+      }
+      const out = calcMatchOutcome(m);
+      const p1 = playerById(m.p1Id), p2 = playerById(m.p2Id);
+      const row = document.createElement('div');
+      row.className = 'match-row ' + (out ? 'played' : 'pending');
+      row.onclick = () => openResultModal(m.id);
+      const winnerCls1 = out ? (out.winnerIs1 ? 'winner' : 'loser') : '';
+      const winnerCls2 = out ? (!out.winnerIs1 ? 'winner' : 'loser') : '';
+      row.innerHTML = `
+        <div class="player-side left">
+          <div class="${winnerCls1}">${escapeHtml(p1?.name || '?')}</div>
+        </div>
+        ${out
+          ? `<div class="score-box">${out.sets1} : ${out.sets2}<div class="games-detail">${m.sets.map(s => `${s[0]}:${s[1]}`).join(' · ')}</div></div>`
+          : `<div class="add-btn">+ pridať</div>`}
+        <div class="player-side right">
+          <div class="${winnerCls2}">${escapeHtml(p2?.name || '?')}</div>
+        </div>
+      `;
+      inner.appendChild(row);
+    });
+  });
+}
+
+/* ---------- RENDER: VÝSLEDKY ---------- */
+function renderResults() {
+  const wrap = document.getElementById('resultsContainer');
+  const played = DATA.matches.filter(m => m.sets && m.sets.length > 0);
+  played.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  if (played.length === 0) {
+    wrap.innerHTML = '<div class="empty"><div class="empty-icon">🎾</div>Zatiaľ žiadne odohraté zápasy</div>';
+    return;
+  }
+  wrap.innerHTML = played.map(m => {
+    const out = calcMatchOutcome(m);
+    const p1 = playerById(m.p1Id), p2 = playerById(m.p2Id);
+    return `
+      <div class="match-row played" onclick="openResultModal('${m.id}')">
+        <div class="player-side left">
+          <div class="${out.winnerIs1 ? 'winner' : 'loser'}">${escapeHtml(p1?.name || '?')}</div>
+          <div style="font-size:11px; color:var(--text-3); margin-top:2px;">Cyklus ${m.cycle} · Div. ${m.division} · ${m.date || '—'}</div>
+        </div>
+        <div class="score-box">${out.sets1} : ${out.sets2}<div class="games-detail">${m.sets.map(s => `${s[0]}:${s[1]}`).join(' · ')}</div></div>
+        <div class="player-side right">
+          <div class="${!out.winnerIs1 ? 'winner' : 'loser'}">${escapeHtml(p2?.name || '?')}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ---------- RENDER: ŠTATISTIKY ---------- */
+function renderStats() {
+  const allMatches = DATA.matches.filter(m => m.sets && m.sets.length > 0);
+
+  // Súhrnné karty
+  const totalMatches = allMatches.length;
+  const totalSets = allMatches.reduce((s, m) => s + (m.sets?.length || 0), 0);
+  const totalGames = allMatches.reduce((s, m) => s + m.sets.reduce((a, set) => a + (set[0]||0) + (set[1]||0), 0), 0);
+  const tiebreaks = allMatches.filter(m => m.sets.length === 3).length;
+
+  document.getElementById('statGrid').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Odohraných zápasov</div><div class="stat-value">${totalMatches}</div></div>
+    <div class="stat-card"><div class="stat-label">Odohraných setov</div><div class="stat-value">${totalSets}</div></div>
+    <div class="stat-card"><div class="stat-label">Odohraných gemov</div><div class="stat-value">${totalGames}</div></div>
+    <div class="stat-card"><div class="stat-label">3-setové zápasy</div><div class="stat-value">${tiebreaks}</div></div>
+  `;
+
+  // Top winners
+  const playerStats = {};
+  DATA.players.forEach(p => playerStats[p.id] = { id: p.id, name: p.name, division: p.division, wins: 0, losses: 0, played: 0 });
+  allMatches.forEach(m => {
+    const out = calcMatchOutcome(m);
+    if (!out) return;
+    const s1 = playerStats[m.p1Id], s2 = playerStats[m.p2Id];
+    if (!s1 || !s2) return;
+    s1.played++; s2.played++;
+    if (out.winnerIs1) { s1.wins++; s2.losses++; }
+    else { s2.wins++; s1.losses++; }
+  });
+
+  const winners = Object.values(playerStats).filter(p => p.wins > 0).sort((a,b) => b.wins - a.wins).slice(0, 10);
+  document.getElementById('topWinners').innerHTML = winners.length ? winners.map((p, i) => `
+    <div class="match-row" style="grid-template-columns: auto 1fr auto; cursor:default;">
+      <span class="pos">${i+1}</span>
+      <div><strong>${escapeHtml(p.name)}</strong> <span style="color:var(--text-2); font-size:12px;">· Div. ${p.division}</span></div>
+      <div><span class="points">${p.wins}V</span> <span style="color:var(--text-3);">/ ${p.losses}P</span></div>
+    </div>
+  `).join('') : '<div class="empty">Zatiaľ žiadne výhry</div>';
+
+  const winrate = Object.values(playerStats)
+    .filter(p => p.played >= 3)
+    .map(p => ({...p, rate: p.wins / p.played}))
+    .sort((a,b) => b.rate - a.rate)
+    .slice(0, 10);
+  document.getElementById('topWinrate').innerHTML = winrate.length ? winrate.map((p, i) => `
+    <div class="match-row" style="grid-template-columns: auto 1fr auto; cursor:default;">
+      <span class="pos">${i+1}</span>
+      <div><strong>${escapeHtml(p.name)}</strong> <span style="color:var(--text-2); font-size:12px;">· Div. ${p.division} · ${p.played} zápasov</span></div>
+      <div><span class="points">${Math.round(p.rate * 100)}%</span></div>
+    </div>
+  `).join('') : '<div class="empty">Málo dát (treba aspoň 3 zápasy na hráča)</div>';
+}
+
+/* ---------- RENDER: ADMIN HRÁČI ---------- */
+function renderAdminPlayers() {
+  const wrap = document.getElementById('playersList');
+  wrap.innerHTML = DATA.players.map(p => `
+    <div class="player-row" data-id="${p.id}">
+      <input type="text" value="${escapeHtml(p.name)}" data-field="name">
+      <select data-field="division">
+        <option value="A" ${p.division==='A'?'selected':''}>A</option>
+        <option value="B" ${p.division==='B'?'selected':''}>B</option>
+        <option value="C" ${p.division==='C'?'selected':''}>C</option>
+      </select>
+      <button class="btn small danger" onclick="removePlayer('${p.id}')">×</button>
+    </div>
+  `).join('');
+}
+
+function addNewPlayer() {
+  const newId = 'p' + Date.now();
+  DATA.players.push({ id: newId, name: 'Nový hráč', division: 'C' });
+  renderAdminPlayers();
+  showToast('Hráč pridaný (nezabudni uložiť a pre-generovať rozpis)');
+}
+
+function removePlayer(id) {
+  if (!confirm('Naozaj odstrániť hráča? Jeho zápasy zostanú v histórii.')) return;
+  DATA.players = DATA.players.filter(p => p.id !== id);
+  renderAdminPlayers();
+}
+
+function savePlayers() {
+  document.querySelectorAll('.player-row').forEach(row => {
+    const id = row.dataset.id;
+    const player = DATA.players.find(p => p.id === id);
+    if (!player) return;
+    player.name = row.querySelector('[data-field="name"]').value.trim() || player.name;
+    player.division = row.querySelector('[data-field="division"]').value;
+  });
+  saveData();
+  showToast('Hráči uložení');
+  render();
+}
+
+/* ---------- CYKLY ---------- */
+function advanceCycle() {
+  const standA = calcStandings('A', DATA.cycle);
+  const standB = calcStandings('B', DATA.cycle);
+  const standC = calcStandings('C', DATA.cycle);
+
+  if (!confirm(`Ukončiť cyklus ${DATA.cycle} a aplikovať postupy/pády?\n\nZ A padajú: ${standA.slice(-2).map(p=>p.name).join(', ')}\nZ B postupujú: ${standB.slice(0,2).map(p=>p.name).join(', ')}\nZ B padajú: ${standB.slice(-2).map(p=>p.name).join(', ')}\nZ C postupujú: ${standC.slice(0,2).map(p=>p.name).join(', ')}`)) return;
+
+  // Aplikuj zmeny
+  standA.slice(-2).forEach(p => { const pl = DATA.players.find(x => x.id === p.id); if (pl) pl.division = 'B'; });
+  standB.slice(0, 2).forEach(p => { const pl = DATA.players.find(x => x.id === p.id); if (pl) pl.division = 'A'; });
+  standB.slice(-2).forEach(p => { const pl = DATA.players.find(x => x.id === p.id); if (pl) pl.division = 'C'; });
+  standC.slice(0, 2).forEach(p => { const pl = DATA.players.find(x => x.id === p.id); if (pl) pl.division = 'B'; });
+
+  DATA.cycle++;
+  generateMatchesForCycle(DATA, DATA.cycle);
+  saveData();
+  render();
+  showToast(`Spustený cyklus ${DATA.cycle}`);
+}
+
+function regenerateSchedule() {
+  if (!confirm(`Pre-generovať rozpis pre cyklus ${DATA.cycle}? Stratíš všetky neodohrané zápasy (odohraté zostanú).`)) return;
+  // Zachovaj odohrané zápasy
+  const played = DATA.matches.filter(m => m.cycle === DATA.cycle && m.sets && m.sets.length > 0);
+  generateMatchesForCycle(DATA, DATA.cycle);
+  // Vráť odohrané
+  played.forEach(p => {
+    const m = DATA.matches.find(x => x.cycle === DATA.cycle && x.division === p.division &&
+      ((x.p1Id === p.p1Id && x.p2Id === p.p2Id) || (x.p1Id === p.p2Id && x.p2Id === p.p1Id)));
+    if (m) {
+      const swap = m.p1Id !== p.p1Id;
+      m.sets = swap ? p.sets.map(s => [s[1], s[0]]) : p.sets;
+      m.date = p.date;
+    }
+  });
+  saveData();
+  render();
+  showToast('Rozpis prepočítaný');
+}
+
+/* ---------- MODAL ---------- */
+function openResultModal(matchId) {
+  const m = DATA.matches.find(x => x.id === matchId);
+  if (!m) return;
+  CURRENT_MATCH_ID = matchId;
+  const p1 = playerById(m.p1Id), p2 = playerById(m.p2Id);
+  document.getElementById('modalP1Name').textContent = p1?.name || '?';
+  document.getElementById('modalP2Name').textContent = p2?.name || '?';
+  document.getElementById('modalTitle').textContent = m.sets ? 'Upraviť výsledok' : 'Pridať výsledok';
+  document.getElementById('deleteResultBtn').style.display = m.sets ? 'inline-flex' : 'none';
+
+  // Pre-fill
+  for (let i = 1; i <= 3; i++) {
+    document.getElementById(`set${i}p1`).value = m.sets?.[i-1]?.[0] ?? '';
+    document.getElementById(`set${i}p2`).value = m.sets?.[i-1]?.[1] ?? '';
+  }
+  document.getElementById('matchDate').value = m.date || new Date().toISOString().slice(0, 10);
+  document.getElementById('resultModal').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('resultModal').classList.remove('active');
+  CURRENT_MATCH_ID = null;
+}
+
+function saveResult() {
+  const m = DATA.matches.find(x => x.id === CURRENT_MATCH_ID);
+  if (!m) return;
+  const sets = [];
+  for (let i = 1; i <= 3; i++) {
+    const v1 = document.getElementById(`set${i}p1`).value;
+    const v2 = document.getElementById(`set${i}p2`).value;
+    if (v1 !== '' && v2 !== '') {
+      sets.push([parseInt(v1), parseInt(v2)]);
+    }
+  }
+  if (sets.length < 2) {
+    showToast('Zadaj aspoň 2 sety', 'error');
+    return;
+  }
+  // Validácia: niekto musí vyhrať 2 sety
+  let s1 = 0, s2 = 0;
+  sets.forEach(([a, b]) => { if (a > b) s1++; else if (b > a) s2++; });
+  if (s1 < 2 && s2 < 2) {
+    showToast('Niektorý hráč musí vyhrať 2 sety', 'error');
+    return;
+  }
+  m.sets = sets;
+  m.date = document.getElementById('matchDate').value || new Date().toISOString().slice(0, 10);
+  saveData();
+  closeModal();
+  render();
+  showToast('Výsledok uložený');
+}
+
+function deleteResult() {
+  if (!confirm('Naozaj vymazať výsledok tohto zápasu?')) return;
+  const m = DATA.matches.find(x => x.id === CURRENT_MATCH_ID);
+  if (!m) return;
+  m.sets = null;
+  m.date = null;
+  saveData();
+  closeModal();
+  render();
+  showToast('Výsledok vymazaný');
+}
+
+/* ---------- DATA / STORAGE ---------- */
+function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA)); }
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) DATA = JSON.parse(raw);
+    else DATA = getDemoData();
+  } catch (e) { DATA = getDemoData(); }
+  saveData();
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(DATA, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `stl-zaloha-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Záloha stiahnutá');
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (!imported.players || !imported.matches) throw new Error('Neplatný súbor');
+      DATA = imported;
+      saveData();
+      render();
+      showToast('Dáta importované');
+    } catch (err) { showToast('Chyba: ' + err.message, 'error'); }
+  };
+  reader.readAsText(file);
+}
+
+function resetAll() {
+  if (!confirm('Naozaj vynulovať všetko a načítať demo dáta?')) return;
+  DATA = getDemoData();
+  saveData();
+  render();
+  showToast('Reset hotový');
+}
+
+/* ---------- HELPERS ---------- */
+function playerById(id) { return DATA.players.find(p => p.id === id); }
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type === 'error' ? ' error' : '');
+  setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+/* ---------- TABS ---------- */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('view-' + btn.dataset.tab).classList.add('active');
+    if (btn.dataset.tab === 'admin') renderAdminPlayers();
+  });
+});
+
+/* ---------- MAIN RENDER ---------- */
+function render() {
+  document.getElementById('cycleHeaderNum').textContent = DATA.cycle;
+  document.querySelectorAll('.cycle-num').forEach(el => el.textContent = DATA.cycle);
+  const total = DATA.matches.filter(m => m.cycle === DATA.cycle).length;
+  const played = DATA.matches.filter(m => m.cycle === DATA.cycle && m.sets && m.sets.length > 0).length;
+  document.getElementById('totalMatchesPlayed').textContent = played;
+  document.getElementById('totalMatchesScheduled').textContent = total;
+  renderStandings();
+  renderSchedule();
+  renderResults();
+  renderStats();
+  renderAdminPlayers();
+}
+
+document.getElementById('resultModal').addEventListener('click', e => {
+  if (e.target.id === 'resultModal') closeModal();
+});
+
+/* ---------- INIT ---------- */
+loadData();
+render();
+</script>
+</body>
+</html>
