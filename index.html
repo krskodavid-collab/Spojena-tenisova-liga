@@ -2198,19 +2198,34 @@ function savePhotosToLocal() {
 }
 
 /* ---------- DATA / STORAGE ---------- */
+// Firestore neumožňuje nested arrays — matches a playoff serializujeme ako JSON string
+function dataToCloud(data) {
+  const cloud = { ...data };
+  delete cloud.photos;
+  cloud.matches = JSON.stringify(data.matches || []);
+  cloud.playoff = JSON.stringify(data.playoff || { generated: false, matches: [] });
+  return cloud;
+}
+function dataFromCloud(cloud) {
+  const d = { ...cloud };
+  try { d.matches = typeof cloud.matches === 'string' ? JSON.parse(cloud.matches) : (cloud.matches || []); }
+  catch { d.matches = []; }
+  try { d.playoff = typeof cloud.playoff === 'string' ? JSON.parse(cloud.playoff) : (cloud.playoff || { generated: false, matches: [] }); }
+  catch { d.playoff = { generated: false, matches: [] }; }
+  return d;
+}
+
 async function saveData() {
   // Fotky vždy lokálne (Firestore má 1MB limit/dokument)
   savePhotosToLocal();
   // Cache do localStorage (pre offline)
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA)); } catch {}
-  // Push do Firestore (bez fotiek)
+  // Push do Firestore (bez fotiek, matches/playoff serializované)
   if (firestoreReady && firestoreDoc) {
     setSync('syncing', 'ukladám…');
     try {
-      const cloudData = { ...DATA };
-      delete cloudData.photos;
       suppressNextSnapshot = true;
-      await firestoreDoc.set(cloudData);
+      await firestoreDoc.set(dataToCloud(DATA));
       setSync('synced', 'cloud');
     } catch (e) {
       console.error('Firestore save failed:', e);
@@ -2227,7 +2242,7 @@ async function loadData() {
       setSync('syncing', 'sťahujem…');
       const snap = await firestoreDoc.get();
       if (snap.exists) {
-        DATA = snap.data();
+        DATA = dataFromCloud(snap.data());
         DATA.photos = photos;
         DATA = migrateData(DATA);
         setSync('synced', 'cloud');
@@ -2263,7 +2278,7 @@ function setupFirestoreListener() {
     if (!snap.exists) return;
     if (snap.metadata.hasPendingWrites) return; // moja vlastná zmena
     if (suppressNextSnapshot) { suppressNextSnapshot = false; return; }
-    const newData = snap.data();
+    const newData = dataFromCloud(snap.data());
     newData.photos = DATA?.photos || loadPhotosFromLocal();
     DATA = newData;
     render();
