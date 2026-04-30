@@ -529,6 +529,189 @@
   .lightbox img { max-width: 95%; max-height: 85vh; object-fit: contain; }
   .lightbox-caption { color: white; margin-top: 12px; font-size: 14px; }
 
+  /* ===== KONTAKTY ===== */
+  .contact-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+  }
+  .contact-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: border-color 0.15s;
+  }
+  .contact-card:hover { border-color: var(--accent); }
+  .contact-avatar {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .contact-info { flex: 1; min-width: 0; }
+  .contact-name { font-weight: 700; cursor: pointer; }
+  .contact-name:hover { color: var(--accent); }
+  .contact-meta { font-size: 11px; color: var(--text-2); margin-top: 2px; }
+  .contact-phone {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--card-2);
+    border: 1px solid var(--border-2);
+    color: var(--accent);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .contact-phone:hover { background: var(--accent); color: #0a0a0a; }
+  .contact-phone.empty { color: var(--text-3); border-style: dashed; }
+
+  /* ===== INFO ===== */
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .info-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .info-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-2);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .info-value { font-size: 16px; font-weight: 600; }
+  .info-value.tel a { color: var(--accent); text-decoration: none; }
+  .info-value.tel a:hover { text-decoration: underline; }
+  .info-text {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+    white-space: pre-wrap;
+    line-height: 1.6;
+    font-size: 15px;
+  }
+
+  /* ===== ROUND DEADLINES ===== */
+  .round-deadline-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 12px;
+    align-items: center;
+  }
+  .round-deadline-grid label {
+    color: var(--text-2);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .round-header-deadline {
+    color: var(--text-3);
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 8px;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .round-header-deadline.warn { color: var(--orange); }
+  .round-header-deadline.late { color: var(--red); }
+
+  /* ===== PROFIL HRÁČA ===== */
+  .profile-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 18px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .profile-avatar {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  .profile-name { font-size: 22px; font-weight: 800; }
+  .profile-meta { font-size: 13px; color: var(--text-2); margin-top: 4px; }
+  .profile-phone {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 700;
+    margin-top: 6px;
+    font-size: 14px;
+  }
+  .profile-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .profile-stat {
+    background: var(--card-2);
+    padding: 10px 12px;
+    border-radius: 8px;
+  }
+  .profile-stat-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-2);
+    font-weight: 700;
+  }
+  .profile-stat-value {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--accent);
+    margin-top: 2px;
+  }
+  .profile-section-title {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-2);
+    font-weight: 700;
+    margin: 16px 0 8px;
+  }
+  .profile-match {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .profile-match:last-child { border-bottom: none; }
+  .profile-match.win { color: var(--accent); }
+  .profile-match.loss { color: var(--text-2); }
+  .profile-match.pending { color: var(--text-3); }
+  .profile-match-vs { font-weight: 600; }
+  .profile-match-meta { font-size: 11px; color: var(--text-3); }
+  .profile-match-score {
+    font-weight: 800;
+    font-size: 14px;
+  }
+
   /* ===== PLAY-OFF BRACKET ===== */
   .bracket-section { margin-bottom: 36px; }
   .bracket-section-header {
@@ -722,6 +905,8 @@
     <button class="tab-btn" data-tab="results">Výsledky</button>
     <button class="tab-btn" data-tab="playoff">Play-off</button>
     <button class="tab-btn" data-tab="stats">Štatistiky</button>
+    <button class="tab-btn" data-tab="kontakty">Kontakty</button>
+    <button class="tab-btn" data-tab="info">Info</button>
     <button class="tab-btn" data-tab="propozicie">Propozície</button>
     <button class="tab-btn" data-tab="gallery">Galéria</button>
     <button class="tab-btn" data-tab="admin">Admin</button>
@@ -810,6 +995,40 @@
     <div class="card">
       <div class="card-header"><div class="card-title">Top 10 — najviac odohratých zápasov</div></div>
       <div id="topPlayed"></div>
+    </div>
+  </section>
+
+  <!-- ===== KONTAKTY ===== -->
+  <section id="view-kontakty" class="view">
+    <div class="view-header">
+      <div>
+        <h2>Kontakty hráčov</h2>
+        <p>Telefónne čísla na všetkých účastníkov. Klik na číslo otvorí volanie/SMS.</p>
+      </div>
+    </div>
+    <div id="kontaktyContainer"></div>
+  </section>
+
+  <!-- ===== INFO ===== -->
+  <section id="view-info" class="view">
+    <div class="view-header">
+      <div>
+        <h2>Základné informácie</h2>
+        <p>Kde sa hrá, na koho sa obrátiť, doplňujúce informácie</p>
+      </div>
+    </div>
+    <div id="infoDisplayContainer"></div>
+    <div id="adminEditInfo" style="display:none;">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Úprava informácií (admin)</div></div>
+        <div class="form-group"><label>Názov ihriska</label><input type="text" id="infoIhrisko" placeholder="napr. Tenisové kurty Vlčince"></div>
+        <div class="form-group"><label>Adresa</label><input type="text" id="infoAdresa" placeholder="napr. Ul. Vlčinská 7, Žilina"></div>
+        <div class="form-group"><label>Správca ihriska</label><input type="text" id="infoSpravca" placeholder="meno správcu"></div>
+        <div class="form-group"><label>Telefón na správcu</label><input type="tel" id="infoSpravcaTel" placeholder="+421 9XX XXX XXX"></div>
+        <div class="form-group"><label>Otváracie hodiny</label><input type="text" id="infoOtvHodiny" placeholder="napr. Po-Pi 8:00–22:00, So-Ne 9:00–21:00"></div>
+        <div class="form-group"><label>Doplňujúci text (nepovinné)</label><textarea id="infoText" placeholder="Ďalšie informácie ktoré chceš podeliť s hráčmi…" style="min-height:120px;"></textarea></div>
+        <button class="btn" onclick="saveInfo()">Uložiť informácie</button>
+      </div>
     </div>
   </section>
 
@@ -906,6 +1125,15 @@
         <p style="color:var(--text-3); font-size:12px; margin-top:12px;">
           Po zmene hráčov klikni na <strong>„Pre-generovať rozpis"</strong> nižšie, aby sa vytvoril nový rozpis zápasov.
         </p>
+      </div>
+
+      <div class="card admin-section">
+        <div class="card-header"><div class="card-title">Termíny jednotlivých kôl (cyklus <span class="cycle-num">1</span>)</div></div>
+        <p style="color:var(--text-2); font-size:14px; margin-bottom:14px;">
+          Nastav, dokedy musí byť odohrané každé kolo. Ostane viditeľné v rozpise pri každom kole.
+        </p>
+        <div id="roundDeadlinesContainer"></div>
+        <button class="btn small" onclick="saveRoundDeadlines()" style="margin-top:10px;">Uložiť termíny kôl</button>
       </div>
 
       <div class="card admin-section">
@@ -1045,6 +1273,14 @@
   <div class="lightbox-caption" id="lightboxCaption"></div>
 </div>
 
+<!-- ===== MODAL: Profil hráča ===== -->
+<div class="modal-backdrop" id="profileModal">
+  <div class="modal" style="max-width:560px;">
+    <button class="modal-close" onclick="closeModal('profileModal')">&times;</button>
+    <div id="profileBody"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1066,30 +1302,30 @@ let scheduleCycle = 1;
 function getDemoData() {
   const players = [
     // 1. liga (A) – 8 hráčov
-    { id: 'p1',  name: 'Ján Jakubík',         division: 'A' },
-    { id: 'p2',  name: 'Michal Krško',        division: 'A' },
-    { id: 'p3',  name: 'Stanislav Ursíny',    division: 'A' },
-    { id: 'p4',  name: 'Miroslav Mikula',     division: 'A' },
-    { id: 'p5',  name: 'Peter Ondoš',         division: 'A' },
-    { id: 'p6',  name: 'Ivan Krajíček',       division: 'A' },
-    { id: 'p7',  name: 'Andrej Procházka',    division: 'A' },
-    { id: 'p8',  name: 'Anton Kubáň',         division: 'A' },
+    { id: 'p1',  name: 'Ján Jakubík',         division: 'A', phone: '' },
+    { id: 'p2',  name: 'Michal Krško',        division: 'A', phone: '' },
+    { id: 'p3',  name: 'Stanislav Ursíny',    division: 'A', phone: '' },
+    { id: 'p4',  name: 'Miroslav Mikula',     division: 'A', phone: '' },
+    { id: 'p5',  name: 'Peter Ondoš',         division: 'A', phone: '' },
+    { id: 'p6',  name: 'Ivan Krajíček',       division: 'A', phone: '' },
+    { id: 'p7',  name: 'Andrej Procházka',    division: 'A', phone: '' },
+    { id: 'p8',  name: 'Anton Kubáň',         division: 'A', phone: '' },
     // 2. liga (B) – 7 hráčov
-    { id: 'p9',  name: 'Lukáš Holeša',        division: 'B' },
-    { id: 'p10', name: 'Ján Zuzík',           division: 'B' },
-    { id: 'p11', name: 'Marek Meššo',         division: 'B' },
-    { id: 'p12', name: 'Ján Lokaj',           division: 'B' },
-    { id: 'p13', name: 'Ludevít Lalík',       division: 'B' },
-    { id: 'p14', name: 'Dávid Krško',         division: 'B' },
-    { id: 'p15', name: 'Martin Kočitý',       division: 'B' },
+    { id: 'p9',  name: 'Lukáš Holeša',        division: 'B', phone: '' },
+    { id: 'p10', name: 'Ján Zuzík',           division: 'B', phone: '' },
+    { id: 'p11', name: 'Marek Meššo',         division: 'B', phone: '' },
+    { id: 'p12', name: 'Ján Lokaj',           division: 'B', phone: '' },
+    { id: 'p13', name: 'Ludevít Lalík',       division: 'B', phone: '' },
+    { id: 'p14', name: 'Dávid Krško',         division: 'B', phone: '' },
+    { id: 'p15', name: 'Martin Kočitý',       division: 'B', phone: '' },
     // 3. liga (C) – 7 hráčov
-    { id: 'p16', name: 'Simona Špiriaková',   division: 'C' },
-    { id: 'p17', name: 'Miroslav Ozimy',      division: 'C' },
-    { id: 'p18', name: 'Daniel Lokaj',        division: 'C' },
-    { id: 'p19', name: 'Lucia Papanová',      division: 'C' },
-    { id: 'p20', name: 'Ľubomír Korista',     division: 'C' },
-    { id: 'p21', name: 'Peter Ďuroška',       division: 'C' },
-    { id: 'p22', name: 'Štefan Miksák',       division: 'C' }
+    { id: 'p16', name: 'Simona Špiriaková',   division: 'C', phone: '' },
+    { id: 'p17', name: 'Miroslav Ozimy',      division: 'C', phone: '' },
+    { id: 'p18', name: 'Daniel Lokaj',        division: 'C', phone: '' },
+    { id: 'p19', name: 'Lucia Papanová',      division: 'C', phone: '' },
+    { id: 'p20', name: 'Ľubomír Korista',     division: 'C', phone: '' },
+    { id: 'p21', name: 'Peter Ďuroška',       division: 'C', phone: '' },
+    { id: 'p22', name: 'Štefan Miksák',       division: 'C', phone: '' }
   ];
   const data = {
     version: 3,
@@ -1099,6 +1335,8 @@ function getDemoData() {
     players,
     matches: [],
     cycleDeadlines: { 1: '', 2: '' },
+    roundDeadlines: { 1: {}, 2: {} },
+    info: { ihrisko: '', adresa: '', spravca: '', spravcaTel: '', otvHodiny: '', text: '' },
     propozicie: { text: getDefaultPropozicie(), pdfName: '' },
     photos: [],
     auth: { username: 'admin', passwordHash: simpleHash('stl2026') },
@@ -1175,11 +1413,16 @@ function migrateData(d) {
     d.photos = d.photos || [];
     d.auth = d.auth || { username: 'admin', passwordHash: simpleHash('stl2026') };
     d.playoff = d.playoff || { generated: false, matches: [] };
-    // Detekuj staré demo mená (z v1/v2) a ponúkni reset
     const oldDemoNames = ['Adam Kováč', 'Boris Novák', 'Cyril Horváth'];
     const isOldDemo = oldDemoNames.every(n => d.players.some(p => p.name === n));
-    if (isOldDemo) return getDemoData(); // automaticky resetni na nové demo
+    if (isOldDemo) return getDemoData();
   }
+  // v3.1 — pridané telefóny, info, roundDeadlines
+  d.roundDeadlines = d.roundDeadlines || { 1: {}, 2: {} };
+  if (!d.roundDeadlines[1]) d.roundDeadlines[1] = {};
+  if (!d.roundDeadlines[2]) d.roundDeadlines[2] = {};
+  d.info = d.info || { ihrisko: '', adresa: '', spravca: '', spravcaTel: '', otvHodiny: '', text: '' };
+  d.players.forEach(p => { if (typeof p.phone === 'undefined') p.phone = ''; });
   return d;
 }
 
@@ -1546,7 +1789,7 @@ function renderStandings() {
               let posClass = 'playoff';
               if (i === 0) posClass = 'first';
               return `
-                <tr>
+                <tr style="cursor:pointer;" onclick="openProfile('${s.id}')">
                   <td class="center"><span class="pos ${posClass}">${i+1}</span></td>
                   <td><span class="player-name">${escapeHtml(s.name)}</span></td>
                   <td class="center">${s.played}</td>
@@ -1608,8 +1851,17 @@ function renderSchedule() {
     matches.forEach(m => {
       if (m.round !== lastRound) {
         const rh = document.createElement('div');
-        rh.style.cssText = 'padding:10px 12px; color:var(--text-2); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid var(--border);';
-        rh.textContent = `Kolo ${m.round}`;
+        rh.style.cssText = 'padding:10px 12px; color:var(--text-2); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid var(--border); display:flex; align-items:center;';
+        const roundDl = DATA.roundDeadlines?.[scheduleCycle]?.[m.round];
+        let deadlineHtml = '';
+        if (roundDl) {
+          const days = daysUntil(roundDl);
+          let cls = '';
+          if (days < 0) cls = 'late';
+          else if (days <= 3) cls = 'warn';
+          deadlineHtml = `<span class="round-header-deadline ${cls}">do ${formatDate(roundDl)}${days >= 0 ? ` · ${days} ${dayWord(days)}` : ` · po termíne`}</span>`;
+        }
+        rh.innerHTML = `Kolo ${m.round} ${deadlineHtml}`;
         inner.appendChild(rh);
         lastRound = m.round;
       }
@@ -1964,12 +2216,49 @@ function renderAdmin() {
   document.getElementById('newPassword').value = '';
   renderAdminPlayers();
   renderAdminCycleControls();
+  renderAdminRoundDeadlines();
+}
+
+function getRoundsCount() {
+  // Najvyššie číslo kola spomedzi cyklov v aktuálnej sezóne
+  const matches = DATA.matches.filter(m => m.cycle === DATA.cycle && m.type !== 'playoff');
+  if (matches.length === 0) return 7; // default
+  return Math.max(...matches.map(m => m.round || 1));
+}
+
+function renderAdminRoundDeadlines() {
+  const wrap = document.getElementById('roundDeadlinesContainer');
+  const rounds = getRoundsCount();
+  const deadlines = DATA.roundDeadlines?.[DATA.cycle] || {};
+  let html = '<div class="round-deadline-grid">';
+  for (let r = 1; r <= rounds; r++) {
+    html += `
+      <label>Kolo ${r}</label>
+      <input type="date" data-round="${r}" value="${deadlines[r] || ''}">
+    `;
+  }
+  html += '</div>';
+  wrap.innerHTML = html;
+}
+
+async function saveRoundDeadlines() {
+  if (!isLoggedIn()) return;
+  if (!DATA.roundDeadlines) DATA.roundDeadlines = {};
+  if (!DATA.roundDeadlines[DATA.cycle]) DATA.roundDeadlines[DATA.cycle] = {};
+  document.querySelectorAll('#roundDeadlinesContainer input[data-round]').forEach(inp => {
+    const r = parseInt(inp.dataset.round);
+    DATA.roundDeadlines[DATA.cycle][r] = inp.value;
+  });
+  await saveData();
+  render();
+  showToast('Termíny kôl uložené');
 }
 function renderAdminPlayers() {
   const wrap = document.getElementById('playersList');
   wrap.innerHTML = DATA.players.map(p => `
-    <div class="player-row" data-id="${p.id}">
-      <input type="text" value="${escapeHtml(p.name)}" data-field="name">
+    <div class="player-row" data-id="${p.id}" style="flex-wrap:wrap;">
+      <input type="text" value="${escapeHtml(p.name)}" data-field="name" placeholder="Meno" style="min-width:180px;">
+      <input type="tel" value="${escapeHtml(p.phone || '')}" data-field="phone" placeholder="Telefón" style="min-width:140px; max-width:170px;">
       <select data-field="division">
         <option value="A" ${p.division==='A'?'selected':''}>1. liga</option>
         <option value="B" ${p.division==='B'?'selected':''}>2. liga</option>
@@ -2008,16 +2297,17 @@ function removePlayer(id) {
   DATA.players = DATA.players.filter(p => p.id !== id);
   renderAdminPlayers();
 }
-function savePlayers() {
+async function savePlayers() {
   if (!isLoggedIn()) return;
   document.querySelectorAll('.player-row').forEach(row => {
     const id = row.dataset.id;
     const player = DATA.players.find(p => p.id === id);
     if (!player) return;
     player.name = row.querySelector('[data-field="name"]').value.trim() || player.name;
+    player.phone = (row.querySelector('[data-field="phone"]')?.value || '').trim();
     player.division = row.querySelector('[data-field="division"]').value;
   });
-  saveData(); showToast('Hráči uložení'); render();
+  await saveData(); showToast('Hráči uložení'); render();
 }
 function saveDeadline() {
   if (!isLoggedIn()) return;
@@ -2321,6 +2611,208 @@ async function resetAll() {
   await saveData(); render(); showToast('Reset hotový');
 }
 
+/* ---------- RENDER: KONTAKTY ---------- */
+function renderKontakty() {
+  const wrap = document.getElementById('kontaktyContainer');
+  wrap.innerHTML = '';
+  ['A', 'B', 'C'].forEach(div => {
+    const players = DATA.players.filter(p => p.division === div);
+    if (players.length === 0) return;
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-header">
+        <div class="card-title">
+          <span class="division-tag div-${div}">${divisionShort(div)}</span>
+          <span>${divisionLabel(div)}</span>
+          <span style="color:var(--text-2); font-weight:500; font-size:13px;">· ${players.length} hráčov</span>
+        </div>
+      </div>
+      <div class="contact-grid">
+        ${players.map(p => {
+          const initials = p.name.split(' ').map(s => s[0]).join('').slice(0, 2).toUpperCase();
+          const hasPhone = !!(p.phone && p.phone.trim());
+          const phoneClean = hasPhone ? p.phone.replace(/\s/g, '') : '';
+          return `
+            <div class="contact-card">
+              <div class="contact-avatar div-${div}">${escapeHtml(initials)}</div>
+              <div class="contact-info">
+                <div class="contact-name" onclick="openProfile('${p.id}')">${escapeHtml(p.name)}</div>
+                <div class="contact-meta">${divisionLabel(div)}</div>
+              </div>
+              ${hasPhone
+                ? `<a href="tel:${escapeHtml(phoneClean)}" class="contact-phone">📞 ${escapeHtml(p.phone)}</a>`
+                : `<span class="contact-phone empty">— bez čísla</span>`}
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+    wrap.appendChild(card);
+  });
+}
+
+/* ---------- RENDER: INFO ---------- */
+function renderInfo() {
+  const i = DATA.info || {};
+  const display = document.getElementById('infoDisplayContainer');
+  const fields = [
+    { label: 'Ihrisko', value: i.ihrisko, icon: '🎾' },
+    { label: 'Adresa', value: i.adresa, icon: '📍' },
+    { label: 'Správca ihriska', value: i.spravca, icon: '👤' },
+    { label: 'Telefón na správcu', value: i.spravcaTel, icon: '📞', tel: true },
+    { label: 'Otváracie hodiny', value: i.otvHodiny, icon: '🕐' }
+  ];
+  const fieldsHtml = fields.filter(f => f.value && f.value.trim()).map(f => `
+    <div class="info-card">
+      <div class="info-label">${f.icon} ${f.label}</div>
+      <div class="info-value ${f.tel ? 'tel' : ''}">
+        ${f.tel ? `<a href="tel:${escapeHtml(f.value.replace(/\s/g,''))}">${escapeHtml(f.value)}</a>` : escapeHtml(f.value)}
+      </div>
+    </div>
+  `).join('');
+  let html = '';
+  if (fieldsHtml) html += `<div class="info-grid">${fieldsHtml}</div>`;
+  if (i.text && i.text.trim()) html += `<div class="info-text">${escapeHtml(i.text)}</div>`;
+  if (!fieldsHtml && !(i.text && i.text.trim())) {
+    html = '<div class="empty"><div class="empty-icon">ℹ️</div>Zatiaľ žiadne informácie' + (isLoggedIn() ? '<br><br><small>Vyplň ich nižšie v admin formulári</small>' : '') + '</div>';
+  }
+  display.innerHTML = html;
+
+  // Admin edit
+  const edit = document.getElementById('adminEditInfo');
+  if (isLoggedIn()) {
+    edit.style.display = 'block';
+    document.getElementById('infoIhrisko').value = i.ihrisko || '';
+    document.getElementById('infoAdresa').value = i.adresa || '';
+    document.getElementById('infoSpravca').value = i.spravca || '';
+    document.getElementById('infoSpravcaTel').value = i.spravcaTel || '';
+    document.getElementById('infoOtvHodiny').value = i.otvHodiny || '';
+    document.getElementById('infoText').value = i.text || '';
+  } else edit.style.display = 'none';
+}
+async function saveInfo() {
+  if (!isLoggedIn()) return;
+  DATA.info = {
+    ihrisko: document.getElementById('infoIhrisko').value.trim(),
+    adresa: document.getElementById('infoAdresa').value.trim(),
+    spravca: document.getElementById('infoSpravca').value.trim(),
+    spravcaTel: document.getElementById('infoSpravcaTel').value.trim(),
+    otvHodiny: document.getElementById('infoOtvHodiny').value.trim(),
+    text: document.getElementById('infoText').value
+  };
+  await saveData();
+  renderInfo();
+  showToast('Informácie uložené');
+}
+
+/* ---------- PROFIL HRÁČA ---------- */
+function openProfile(playerId) {
+  const p = playerById(playerId);
+  if (!p) return;
+  const body = document.getElementById('profileBody');
+
+  // Všetky zápasy hráča (vrátane play-off)
+  const allMatches = [...DATA.matches, ...(DATA.playoff?.matches || [])]
+    .filter(m => m.p1Id === playerId || m.p2Id === playerId);
+
+  // Štatistiky
+  let played = 0, wins = 0, losses = 0, setsW = 0, setsL = 0, gamesW = 0, gamesL = 0, points = 0;
+  let twoNil = 0, threeSets = 0;
+  let cur = { type: null, count: 0, lW: 0, lL: 0 };
+
+  const playedMatches = allMatches.filter(m => m.sets && m.sets.length > 0)
+    .sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+  playedMatches.forEach(m => {
+    const out = calcMatchOutcome(m); if (!out) return;
+    const isP1 = m.p1Id === playerId;
+    played++;
+    setsW += isP1 ? out.sets1 : out.sets2;
+    setsL += isP1 ? out.sets2 : out.sets1;
+    gamesW += isP1 ? out.games1 : out.games2;
+    gamesL += isP1 ? out.games2 : out.games1;
+    points += isP1 ? out.pts1 : out.pts2;
+    const won = (isP1 && out.winnerIs1) || (!isP1 && !out.winnerIs1);
+    if (won) {
+      wins++;
+      if ((isP1 && out.sets1 === 2 && out.sets2 === 0) || (!isP1 && out.sets2 === 2 && out.sets1 === 0)) twoNil++;
+    } else losses++;
+    if (m.sets.length === 3) threeSets++;
+    if (won) { if (cur.type === 'W') cur.count++; else { cur.type = 'W'; cur.count = 1; } if (cur.count > cur.lW) cur.lW = cur.count; }
+    else { if (cur.type === 'L') cur.count++; else { cur.type = 'L'; cur.count = 1; } if (cur.count > cur.lL) cur.lL = cur.count; }
+  });
+
+  const winRate = played > 0 ? Math.round(wins / played * 100) : 0;
+  const initials = p.name.split(' ').map(s => s[0]).join('').slice(0, 2).toUpperCase();
+
+  // Naplánované (neodohrané)
+  const pending = allMatches.filter(m => !m.sets || m.sets.length === 0);
+
+  const matchRow = (m) => {
+    const isP1 = m.p1Id === playerId;
+    const opponentId = isP1 ? m.p2Id : m.p1Id;
+    const opponent = opponentId ? playerById(opponentId) : null;
+    const out = calcMatchOutcome(m);
+    let label;
+    if (m.type === 'playoff') label = `Play-off ${m.round} · ${divisionLabel(m.division)}`;
+    else label = `Cyklus ${m.cycle} · Kolo ${m.round} · ${divisionLabel(m.division)}`;
+    if (m.date) label += ' · ' + formatDate(m.date);
+
+    if (!out) {
+      return `<div class="profile-match pending">
+        <div>
+          <div class="profile-match-vs">vs ${escapeHtml(opponent?.name || 'TBA')}</div>
+          <div class="profile-match-meta">${label}</div>
+        </div>
+        <div style="font-size:11px;">neodohraný</div>
+      </div>`;
+    }
+    const won = (isP1 && out.winnerIs1) || (!isP1 && !out.winnerIs1);
+    const myS = isP1 ? out.sets1 : out.sets2;
+    const oS = isP1 ? out.sets2 : out.sets1;
+    return `<div class="profile-match ${won ? 'win' : 'loss'}">
+      <div>
+        <div class="profile-match-vs">vs ${escapeHtml(opponent?.name || '?')}</div>
+        <div class="profile-match-meta">${label}</div>
+      </div>
+      <div class="profile-match-score">${myS} : ${oS}</div>
+    </div>`;
+  };
+
+  body.innerHTML = `
+    <div class="profile-header">
+      <div class="profile-avatar div-${p.division}">${escapeHtml(initials)}</div>
+      <div style="flex:1;">
+        <div class="profile-name">${escapeHtml(p.name)}</div>
+        <div class="profile-meta">${divisionLabel(p.division)}</div>
+        ${p.phone && p.phone.trim()
+          ? `<a href="tel:${escapeHtml(p.phone.replace(/\s/g,''))}" class="profile-phone">📞 ${escapeHtml(p.phone)}</a>`
+          : '<div style="color:var(--text-3); font-size:13px; margin-top:6px;">— bez telefónu</div>'}
+      </div>
+    </div>
+    <div class="profile-stats">
+      <div class="profile-stat"><div class="profile-stat-label">Odohraných</div><div class="profile-stat-value">${played}</div></div>
+      <div class="profile-stat"><div class="profile-stat-label">Bilancia</div><div class="profile-stat-value">${wins} : ${losses}</div></div>
+      <div class="profile-stat"><div class="profile-stat-label">Úspešnosť</div><div class="profile-stat-value">${winRate}%</div></div>
+      <div class="profile-stat"><div class="profile-stat-label">Body</div><div class="profile-stat-value">${points}</div></div>
+      <div class="profile-stat"><div class="profile-stat-label">Sety</div><div class="profile-stat-value" style="font-size:14px;">${setsW} : ${setsL}</div></div>
+      <div class="profile-stat"><div class="profile-stat-label">Gemy</div><div class="profile-stat-value" style="font-size:14px;">${gamesW} : ${gamesL}</div></div>
+      <div class="profile-stat"><div class="profile-stat-label">Najdlh. šnúra</div><div class="profile-stat-value">${cur.lW}</div></div>
+      <div class="profile-stat"><div class="profile-stat-label">Výhry 2:0</div><div class="profile-stat-value">${twoNil}</div></div>
+    </div>
+    ${playedMatches.length > 0 ? `
+      <div class="profile-section-title">Odohrané zápasy (${playedMatches.length})</div>
+      ${playedMatches.slice().reverse().map(matchRow).join('')}
+    ` : ''}
+    ${pending.length > 0 ? `
+      <div class="profile-section-title">Naplánované (${pending.length})</div>
+      ${pending.map(matchRow).join('')}
+    ` : ''}
+    ${(playedMatches.length === 0 && pending.length === 0) ? `<div class="empty"><div class="empty-icon">🎾</div>Hráč zatiaľ nemá žiadne zápasy</div>` : ''}
+  `;
+  document.getElementById('profileModal').classList.add('active');
+}
+
 /* ---------- TABS ---------- */
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -2377,6 +2869,8 @@ function render() {
   renderResults();
   renderPlayoff();
   renderStats();
+  renderKontakty();
+  renderInfo();
   renderPropozicie();
   renderGallery();
   renderAdmin();
@@ -2385,6 +2879,7 @@ function render() {
 document.getElementById('resultModal').addEventListener('click', e => { if (e.target.id === 'resultModal') closeModal('resultModal'); });
 document.getElementById('loginModal').addEventListener('click', e => { if (e.target.id === 'loginModal') closeModal('loginModal'); });
 document.getElementById('photoModal').addEventListener('click', e => { if (e.target.id === 'photoModal') closeModal('photoModal'); });
+document.getElementById('profileModal').addEventListener('click', e => { if (e.target.id === 'profileModal') closeModal('profileModal'); });
 
 /* ---------- INIT ---------- */
 (async function init() {
