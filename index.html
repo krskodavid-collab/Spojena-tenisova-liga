@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Spojená tenisová liga 2026</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -89,6 +91,25 @@
   }
   .login-icon-btn:hover { color: var(--accent); border-color: var(--accent); }
   .login-icon-btn.logged-in { color: var(--accent); border-color: var(--accent); }
+  .sync-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--card-2);
+    border: 1px solid var(--border-2);
+    color: var(--text-2);
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .sync-indicator.synced { color: var(--green); border-color: var(--green); }
+  .sync-indicator.error { color: var(--red); border-color: var(--red); }
+  .sync-indicator.syncing { color: var(--orange); border-color: var(--orange); }
+  .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+  .sync-indicator.syncing .sync-dot { animation: pulse 1.2s infinite; }
 
   /* ===== TABS ===== */
   nav.tabs {
@@ -686,6 +707,7 @@
       </div>
     </div>
     <div class="header-right">
+      <div id="syncIndicator" class="sync-indicator syncing" title="Synchronizácia s cloudom"><span class="sync-dot"></span><span id="syncText">…</span></div>
       <div id="deadlineBadge" class="badge deadline" style="display:none;"></div>
       <button class="login-icon-btn" id="loginIconBtn" title="Prihlásenie do administrácie" onclick="toggleAuth()">🔒</button>
     </div>
@@ -913,7 +935,8 @@
       <div class="card admin-section">
         <div class="card-header"><div class="card-title">Dáta</div></div>
         <p style="color:var(--text-2); font-size:14px; margin-bottom:12px;">
-          Dáta sú uložené v prehliadači. Pre zálohu si exportuj JSON.
+          Dáta (hráči, výsledky, propozície) sa synchronizujú cez <strong style="color:var(--accent);">Firebase cloud</strong> — keď zadáš výsledok, hneď ho vidia všetci hráči.<br>
+          Fotky zostávajú lokálne v prehliadači (limit cloudu).
         </p>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
           <button class="btn secondary" onclick="exportData()">⬇ Export JSON</button>
@@ -2129,9 +2152,100 @@ function deleteResult() {
   saveData(); closeModal('resultModal'); render(); showToast('Výsledok vymazaný');
 }
 
+/* ---------- FIREBASE / FIRESTORE ---------- */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCsnYOga1xU4dNQ_VjcMeofxkwhp-WNwjs",
+  authDomain: "stl-2026-2c5b1.firebaseapp.com",
+  projectId: "stl-2026-2c5b1",
+  storageBucket: "stl-2026-2c5b1.firebasestorage.app",
+  messagingSenderId: "672793277197",
+  appId: "1:672793277197:web:bd5ced0c642f6aa6edb644"
+};
+const PHOTOS_KEY = 'stl_photos_local';
+let firestoreDoc = null;
+let firestoreReady = false;
+let suppressNextSnapshot = false;
+
+function initFirebase() {
+  try {
+    if (typeof firebase === 'undefined') throw new Error('Firebase SDK nie je načítaný');
+    if (!firebase.apps?.length) firebase.initializeApp(FIREBASE_CONFIG);
+    const db = firebase.firestore();
+    firestoreDoc = db.collection('leagues').doc('stl-2026');
+    firestoreReady = true;
+    setSync('syncing', 'spájam…');
+  } catch (e) {
+    console.error('Firebase init failed:', e);
+    firestoreReady = false;
+    setSync('error', 'offline');
+  }
+}
+
+function setSync(state, text) {
+  const el = document.getElementById('syncIndicator');
+  if (!el) return;
+  el.classList.remove('synced', 'error', 'syncing');
+  el.classList.add(state);
+  document.getElementById('syncText').textContent = text || '';
+}
+
+function loadPhotosFromLocal() {
+  try { return JSON.parse(localStorage.getItem(PHOTOS_KEY) || '[]'); } catch { return []; }
+}
+function savePhotosToLocal() {
+  try { localStorage.setItem(PHOTOS_KEY, JSON.stringify(DATA?.photos || [])); }
+  catch (e) { console.error('Photo save failed:', e); }
+}
+
 /* ---------- DATA / STORAGE ---------- */
-function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA)); }
-function loadData() {
+async function saveData() {
+  // Fotky vždy lokálne (Firestore má 1MB limit/dokument)
+  savePhotosToLocal();
+  // Cache do localStorage (pre offline)
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(DATA)); } catch {}
+  // Push do Firestore (bez fotiek)
+  if (firestoreReady && firestoreDoc) {
+    setSync('syncing', 'ukladám…');
+    try {
+      const cloudData = { ...DATA };
+      delete cloudData.photos;
+      suppressNextSnapshot = true;
+      await firestoreDoc.set(cloudData);
+      setSync('synced', 'cloud');
+    } catch (e) {
+      console.error('Firestore save failed:', e);
+      setSync('error', 'chyba');
+    }
+  }
+}
+
+async function loadData() {
+  const photos = loadPhotosFromLocal();
+  // 1) Skús Firestore
+  if (firestoreReady && firestoreDoc) {
+    try {
+      setSync('syncing', 'sťahujem…');
+      const snap = await firestoreDoc.get();
+      if (snap.exists) {
+        DATA = snap.data();
+        DATA.photos = photos;
+        DATA = migrateData(DATA);
+        setSync('synced', 'cloud');
+        return;
+      } else {
+        // Prvé spustenie ever — vytvor demo a nahraj
+        DATA = getDemoData();
+        DATA.photos = photos;
+        await saveData();
+        setSync('synced', 'cloud');
+        return;
+      }
+    } catch (e) {
+      console.error('Firestore load failed:', e);
+      setSync('error', 'offline');
+    }
+  }
+  // 2) Fallback localStorage
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
               || localStorage.getItem('stl_data_v2')
@@ -2139,8 +2253,26 @@ function loadData() {
     if (raw) DATA = JSON.parse(raw);
     else DATA = getDemoData();
     DATA = migrateData(DATA);
-  } catch (e) { DATA = getDemoData(); }
-  saveData();
+    DATA.photos = photos;
+  } catch { DATA = getDemoData(); DATA.photos = photos; }
+}
+
+function setupFirestoreListener() {
+  if (!firestoreReady || !firestoreDoc) return;
+  firestoreDoc.onSnapshot(snap => {
+    if (!snap.exists) return;
+    if (snap.metadata.hasPendingWrites) return; // moja vlastná zmena
+    if (suppressNextSnapshot) { suppressNextSnapshot = false; return; }
+    const newData = snap.data();
+    newData.photos = DATA?.photos || loadPhotosFromLocal();
+    DATA = newData;
+    render();
+    showToast('Aktualizované z cloudu');
+    setSync('synced', 'cloud');
+  }, err => {
+    console.error('Listener error:', err);
+    setSync('error', 'offline');
+  });
 }
 function exportData() {
   const blob = new Blob([JSON.stringify(DATA, null, 2)], { type: 'application/json' });
@@ -2166,11 +2298,12 @@ function importData(event) {
   };
   reader.readAsText(file);
 }
-function resetAll() {
+async function resetAll() {
   if (!isLoggedIn()) return;
-  if (!confirm('Naozaj vynulovať všetko a načítať novú sezónu STL 2026?')) return;
+  if (!confirm('Naozaj vynulovať všetko a načítať novú sezónu STL 2026? (zmaže to dáta aj v cloude pre všetkých)')) return;
   DATA = getDemoData();
-  saveData(); render(); showToast('Reset hotový');
+  DATA.photos = loadPhotosFromLocal(); // fotky zostanú
+  await saveData(); render(); showToast('Reset hotový');
 }
 
 /* ---------- TABS ---------- */
@@ -2239,8 +2372,12 @@ document.getElementById('loginModal').addEventListener('click', e => { if (e.tar
 document.getElementById('photoModal').addEventListener('click', e => { if (e.target.id === 'photoModal') closeModal('photoModal'); });
 
 /* ---------- INIT ---------- */
-loadData();
-render();
+(async function init() {
+  initFirebase();
+  await loadData();
+  render();
+  setupFirestoreListener();
+})();
 </script>
 </body>
 </html>
