@@ -1075,7 +1075,7 @@
     <div class="view-header">
       <div>
         <h2>Tabuľky</h2>
-        <p id="standingsSubtitle">Sezónny súčet bodov za Cyklus 1 + Cyklus 2 · bodovanie podľa setov (2:0 → 3 b., 2:1 → 2 b. + 1 b.)</p>
+        <p id="standingsSubtitle">Bodovanie: víťazstvo 2 b. · prehra 1 b. · neodohraný zápas 0 b.</p>
       </div>
       <div>
         <button class="btn small secondary" id="standingsModeBtn" onclick="toggleStandingsMode()">Cyklus <span id="cycleModeNum">1</span></button>
@@ -1528,52 +1528,197 @@ function getDemoData() {
 }
 
 function getDefaultPropozicie() {
-  return `SPOJENÁ TENISOVÁ LIGA — SEZÓNA 2026
+  return `SPOJENÁ TENISOVÁ LIGA — PROPOZÍCIE 2026
+Organizovaná za podpory obce Divinka a OZ Športový klub Supertalent
 
-ROZDELENIE HRÁČOV
-• 1. liga — 8 hráčov
-• 2. liga — 7 hráčov
-• 3. liga — 7 hráčov
-Spolu 22 hráčov.
+═══════════════════════════════════════
+PRAVIDLÁ A ORGANIZÁCIA
+═══════════════════════════════════════
 
-SYSTÉM SEZÓNY
-Sezónu tvoria 2 cykly. V každom cykle hrá v rámci svojej ligy každý s každým ("každý s každým"). Hráči zostávajú v tej istej lige cez celú sezónu — body z oboch cyklov sa kumulujú.
+Právo účasti majú LEN neregistrovaní hráči.
 
-POČET ZÁPASOV ZA SEZÓNU
-• 1. liga: 7 zápasov za cyklus, spolu 14 zápasov
-• 2. liga: 6 zápasov za cyklus, spolu 12 zápasov
-• 3. liga: 6 zápasov za cyklus, spolu 12 zápasov
+═══════════════════════════════════════
+HERNÝ SYSTÉM
+═══════════════════════════════════════
 
-PLAY-OFF (po skončení 2. cyklu)
-Po dokončení oboch cyklov sa v každej lige odohrá play-off. Nasadenie do play-off určuje sezónne poradie (súčet bodov z oboch cyklov).
+Liga sa skladá z 3 líg (1., 2. a 3.). Každý hráč je zadelený do jednej z líg podľa výkonnosti.
 
-• Pri 8 hráčoch (1. liga):
-  Štvrťfinále: 1v8, 2v7, 3v6, 4v5
-  Semifinále → Finále
+V rámci svojej ligy každý hráč odohrá zápasy so všetkými súpermi — každý s každým = 1. cyklus.
 
-• Pri 7 hráčoch (2. a 3. liga):
-  1. miesto má voľný lístok do semifinále
-  Štvrťfinále: 4v5, 3v6, 2v7
-  Semifinále: 1 vs víťaz(4v5), víťaz(3v6) vs víťaz(2v7)
-  Finále
+Po 1. cykle prví dvaja postupujú do vyššej ligy a poslední dvaja v lige zostupujú do nižšej ligy.
 
-BODOVANIE PODĽA SETOV
-• Výhra 2:0 v setoch → víťaz 3 body, porazený 0 bodov
-• Výhra 2:1 v setoch → víťaz 2 body, porazený 1 bod
+Nasleduje 2. cyklus, kde sa taktiež odohrajú zápasy každý s každým a opäť prví dvaja postupujú, poslední dvaja zostupujú.
 
-PORADIE PRI ROVNOSTI BODOV
-1. Vyšší počet bodov
-2. Vzájomný zápas
-3. Lepší rozdiel setov
-4. Lepší rozdiel gemov
-5. Žreb / abeceda
+Po odohraní oboch cyklov nasleduje play-off, ktoré každý odohrá v tej lige, v ktorej sa bude nachádzať po 2. cykle. Play-off začína zápasmi štvrťfinále, do ktorého postupujú všetci hráči z danej ligy.
 
+═══════════════════════════════════════
 FORMÁT ZÁPASOV
-• 2 vyhraté sety (dva súborné sety)
-• Pri stave 1:1 v setoch sa hrá 3. set ako super tie-break do 10 bodov
+═══════════════════════════════════════
 
-TERMÍN ODOHRANIA
-Hráči si zápasy dohadujú medzi sebou v rámci stanoveného termínu daného cyklu. Termín je viditeľný na hlavnej stránke.`;
+Každý zápas sa hrá na 2 víťazné sety do 6 gemov. Set musí skončiť víťazstvom minimálne o dva gemy pre jedného z hráčov (napr. 6:4, 6:2 a pod.).
+
+V prípade stavu 6:5 sa set nekončí, ale hrá sa ďalší gem (kým nebude 7:5 = koniec setu, alebo 6:6).
+
+V prípade nerozhodného stavu v sete 6:6 nasleduje tiebreak (skrátená hra), ktorý sa hrá do 7 bodov, avšak rozdiel musí byť aspoň 2 body (napr. 7:3, 7:5, 9:7, 12:10 a pod.). Po dohratí tiebreaku je konečný stav v sete 7:6 alebo 6:7 na gemy.
+
+═══════════════════════════════════════
+BODOVANIE
+═══════════════════════════════════════
+
+• Víťazstvo: 2 body
+• Prehra: 1 bod
+• Neodohraný zápas do konca termínu: 0 bodov
+
+═══════════════════════════════════════
+PORADIE PRI ROVNOSTI BODOV
+═══════════════════════════════════════
+
+1. Počet bodov
+2. Vzájomné zápasy
+3. Skóre — sety, potom gemy
+4. V prípade potreby mikro-tabuľka
+
+═══════════════════════════════════════
+KONTUMÁCIE A TERMÍNY
+═══════════════════════════════════════
+
+Hráč, ktorý bude mať 3 a viac kontumácií, automaticky nepostupuje do play-off.
+
+Predohranie zápasov je možné. Dohrávanie po stanovenom termíne nie je dovolené!
+
+═══════════════════════════════════════
+PRAVIDLÁ HRY
+═══════════════════════════════════════
+
+Hrá sa podľa platných najaktuálnejších pravidiel tenisu ITF 2018 (voľne dostupné na webe), ako aj podľa pravidiel a organizačných pokynov uvedených v týchto propozíciách.
+
+Účasť rozhodcu na zápase nie je povinná. Zápasy sa odohrávajú v priateľskom a spravodlivom duchu, hráči si zápasy rozhodujú sami. Ak by si jeden z hráčov vyžadoval rozhodcu, organizátori jedného rozhodcu pridelia.
+
+V prípade, že sa hráči nedohodnú a po tesnom zápase (na ktorom nebol rozhodca) nebudú vedieť určiť víťaza, obrátia sa na organizátora a on rozhodne, ako sa situácia vyrieši.
+
+═══════════════════════════════════════
+MIESTO ZÁPASOV
+═══════════════════════════════════════
+
+Zápasy sa odohrávajú na mieste, kde sa hráči dohodnú. V prípade play-off zápasov má právo výberu ihriska hráč, ktorý skončil v základnej skupine na vyššej pozícii.
+
+K dispozícii sú hracie plochy:
+a) Multifunkčné ihrisko v Divinke (bezplatne)
+b) Multifunkčné ihrisko v Lúkach (bezplatne)
+c) Iné miesto, napr. antuka niekde v okolí Žiliny — v tom prípade si poplatky za prenájom kurtu hradia samotní hráči.
+
+Ihriská sú k dispozícii prakticky neustále 7 dní v týždni (s malými výnimkami, napr. futbalové turnaje a pod.). Ihrisko je potrebné si telefonicky objednať vopred u správcov uvedených na konci propozícií.
+
+═══════════════════════════════════════
+LOPTIČKY
+═══════════════════════════════════════
+
+Hrá sa s loptičkami, ktoré si zaobstarajú samotní hráči. Je na ich vzájomnej dohode, ktoré z disponibilných loptičiek si vyberú pre hru.
+
+Ak hráči nemajú k dispozícii žiadne vlastné loptičky, môžu kontaktovať organizátorov a budú im loptičky primeranej kvality požičané.
+
+═══════════════════════════════════════
+TERMÍNY ZÁPASOV
+═══════════════════════════════════════
+
+Zápasy je potrebné si naplánovať tak, aby sa stihli odohrať všetky do stanoveného termínu — preto je potrebné začať hrať hneď po dočítaní týchto propozícií. :-)
+
+Pri vlastnom plánovaní zápasov je potrebné brať do úvahy viacero prípadov, kedy hra nebude možná z rôznych dôvodov, ako napr. počasie, cestovanie, zdravotný stav a pod.
+
+═══════════════════════════════════════
+ZODPOVEDNOSŤ
+═══════════════════════════════════════
+
+Všetci hráči nastupujú do súťaže na vlastnú zodpovednosť a vlastné zdravotné riziko. Organizátor súťaže sa dištancuje od akýchkoľvek nárokov hráčov spojených s úhradou poistných udalostí a iných náhrad.
+
+═══════════════════════════════════════
+KOMUNIKÁCIA
+═══════════════════════════════════════
+
+Všetky ďalšie potrebné informácie budú organizátori poskytovať prostredníctvom:
+• spoločnej facebookovej skupiny „Spojená tenisová liga"
+• účastníkom bez FB cez SMS / mail / WhatsApp
+• stránky www.spojenatenisovaliga.sk
+
+═══════════════════════════════════════
+ZÁVER SÚŤAŽE
+═══════════════════════════════════════
+
+Finále 1., 2. a 3. ligy, grilovačka a turnaj štvorhier sa bude konať začiatkom septembra 2026 (presný termín bude upresnený neskôr).
+
+Vyraďovacia časť začne okamžite po odohratí základnej časti (oboch cyklov).
+
+Na záver tenisovej ligy 2026 (začiatok septembra 2026) sa uskutoční vyhodnotenie súťaže, ocenenie víťazov a všetkých zúčastnených hráčov, pohostenie a grilovačka.
+
+═══════════════════════════════════════
+HRÁČI SÚ POVINNÍ
+═══════════════════════════════════════
+
+• Zaplatiť štartovný poplatok 20 € organizátorovi J. Jakubíkovi alebo M. Krškovi na začiatku súťaže (pred prvým zápasom).
+
+• Odohrať stanovený počet zápasov do stanoveného termínu (na každé kolo je stanovený posledný termín na odohranie zápasu).
+
+• Poslať správu o výsledku zápasu (obaja hráči) bezprostredne po odohratí do WhatsApp skupiny „Spojená tenisová liga" alebo Dávidovi Krškovi na tel. číslo +421 919 233 180 krátkou SMS, kde budú uvedené:
+  – mená súperov
+  – výsledok zápasu (stav jednotlivých setov a gemov)
+
+PRÍKLAD: „Jožko Federer vs Matúš Nadal, víťaz: Federer, sety: 2:1, gemy: 6:4, 6:7, 6:2"
+
+• Hráči sú ďalej povinní:
+  – nastupovať na zápasy v športovom oblečení a vhodnej obuvi
+  – priniesť si raketu a loptičky
+  – v záujme vlastnej bezpečnosti a zdravia sa pred zápasom dôkladne rozcvičiť
+  – správať sa slušne a úctivo ku všetkým spoluúčastníkom súťaže
+
+═══════════════════════════════════════
+ORGANIZÁTORI SÚŤAŽE SI VYHRADZUJÚ PRÁVO
+═══════════════════════════════════════
+
+• V prípade potreby pozmeniť alebo prerušiť priebeh súťaže
+• Rozhodovať o sporných záležitostiach
+• Viesť tabuľku s údajmi o mene a priezvisku zúčastnených hráčov
+• Zverejňovať výsledky súťaže, fotografie a mená účastníkov v médiách a na sociálnych sieťach
+
+═══════════════════════════════════════
+ORGANIZÁTORI A SPRÁVCOVIA IHRÍSK
+═══════════════════════════════════════
+
+DÁVID KRŠKO — organizátor
+Telefón: +421 919 233 180
+– vedenie tabuľky, tvorba vyraďovacieho pavúka
+– vyhodnotenie výsledkov
+– prijímanie výsledkov zápasov
+
+JÁN JAKUBÍK — organizátor
+Telefón: +421 911 121 137
+– hlavný rozhodca a koordinátor súťaže
+– časový rozvrh súťaže
+– vyzbieranie štartovného
+– pravidlá a riešenie sporných záležitostí
+– vedenie spoločnej FB skupiny a zasielanie informácií
+
+MICHAL KRŠKO — organizátor
+Telefón: +421 907 831 617
+– koordinátor súťaže
+– materiálna podpora (požičanie loptičiek)
+– vyzbieranie štartovných poplatkov
+– občerstvenie a ceny pre víťazov
+– záverečné vyhodnotenie súťaže
+
+STANISLAV RIŠO — správca ihriska Divinka
+Telefón: +421 907 576 495
+
+DALIBOR MICHALEC — správca ihriska Lúky
+Telefón: +421 910 783 751
+
+═══════════════════════════════════════
+
+POZNÁMKA: vaše plánované zápasy prosím vždy avizujte v spoločnej skupine, aby sme vedeli, kedy sa konajú zápasy a vedeli odhadnúť obsadenosť kurtov.
+
+Prajeme vám príjemné tenisové zážitky.
+
+D. Krško, M. Krško, J. Jakubík
+organizátori STL`;
 }
 
 /* ---------- MIGRATION ---------- */
@@ -1601,6 +1746,13 @@ function migrateData(d) {
   d.organizers = d.organizers || [];
   if (typeof d.organizersTagline === 'undefined') d.organizersTagline = '';
   d.cycleHistory = d.cycleHistory || {};
+  // Aktualizuj default propozície ak sú ešte staré (nikto ich neupravil)
+  if (d.propozicie?.text) {
+    const oldStarts = ['SPOJENÁ TENISOVÁ LIGA — SEZÓNA 2026', 'SPOJENÁ TENISOVÁ LIGA – PROPOZÍCIE'];
+    if (oldStarts.some(s => d.propozicie.text.startsWith(s))) {
+      d.propozicie.text = getDefaultPropozicie();
+    }
+  }
   d.players.forEach(p => { if (typeof p.phone === 'undefined') p.phone = ''; });
   return d;
 }
@@ -1655,12 +1807,9 @@ function calcMatchOutcome(match) {
   });
   if (sets1 === 0 && sets2 === 0) return null;
   const winnerIs1 = sets1 > sets2;
-  let pts1, pts2;
-  if (sets1 === 2 && sets2 === 0) { pts1 = 3; pts2 = 0; }
-  else if (sets1 === 0 && sets2 === 2) { pts1 = 0; pts2 = 3; }
-  else if (sets1 === 2 && sets2 === 1) { pts1 = 2; pts2 = 1; }
-  else if (sets1 === 1 && sets2 === 2) { pts1 = 1; pts2 = 2; }
-  else { pts1 = winnerIs1 ? 2 : 1; pts2 = winnerIs1 ? 1 : 2; }
+  // Bodovanie podľa propozícií STL 2026: víťazstvo = 2 body, prehra = 1 bod
+  const pts1 = winnerIs1 ? 2 : 1;
+  const pts2 = winnerIs1 ? 1 : 2;
   return { sets1, sets2, games1, games2, pts1, pts2, winnerIs1 };
 }
 
@@ -1935,10 +2084,10 @@ function renderStandings() {
   const mode = standingsMode;
   const sub = document.getElementById('standingsSubtitle');
   if (mode === 'season') {
-    sub.textContent = `Sezónny súčet bodov za Cyklus 1 + Cyklus 2 · bodovanie podľa setov (2:0 → 3 b., 2:1 → 2 b. + 1 b.)`;
+    sub.textContent = `Sezónny súčet bodov za Cyklus 1 + Cyklus 2 · víťazstvo 2 b., prehra 1 b., neodohraný 0 b.`;
     document.getElementById('standingsModeBtn').innerHTML = `Cyklus <span id="cycleModeNum">1</span>`;
   } else {
-    sub.textContent = `Tabuľka za Cyklus ${mode} · bodovanie podľa setov`;
+    sub.textContent = `Tabuľka za cyklus ${mode} · víťazstvo 2 b., prehra 1 b., neodohraný 0 b.`;
     document.getElementById('standingsModeBtn').innerHTML = mode === 1 ? `Cyklus <span id="cycleModeNum">2</span>` : `Sezóna spolu`;
   }
   // Postupy/pády: aktívne iba počas cyklu 1 (po cykle 2 nasleduje play-off)
@@ -1952,12 +2101,12 @@ function renderStandings() {
     let legendHtml = '';
     if (showPromoRel) {
       const parts = [];
-      if (div === 'A') parts.push('<span class="lg-item lg-relegate"><span class="lg-arrow">▼</span> Posledné 2 padajú do 2. ligy</span>');
+      if (div === 'A') parts.push('<span class="lg-item lg-relegate"><span class="lg-arrow">▼</span> Poslední dvaja zostupujú do 2. ligy</span>');
       if (div === 'B') {
-        parts.push('<span class="lg-item lg-promote"><span class="lg-arrow">▲</span> Prvé 2 postupujú do 1. ligy</span>');
-        parts.push('<span class="lg-item lg-relegate"><span class="lg-arrow">▼</span> Posledné 2 padajú do 3. ligy</span>');
+        parts.push('<span class="lg-item lg-promote"><span class="lg-arrow">▲</span> Prví dvaja postupujú do 1. ligy</span>');
+        parts.push('<span class="lg-item lg-relegate"><span class="lg-arrow">▼</span> Poslední dvaja zostupujú do 3. ligy</span>');
       }
-      if (div === 'C') parts.push('<span class="lg-item lg-promote"><span class="lg-arrow">▲</span> Prvé 2 postupujú do 2. ligy</span>');
+      if (div === 'C') parts.push('<span class="lg-item lg-promote"><span class="lg-arrow">▲</span> Prví dvaja postupujú do 2. ligy</span>');
       legendHtml = `<div class="league-legend">${parts.join('')}</div>`;
     }
 
@@ -2576,7 +2725,7 @@ function renderAdminCycleControls() {
 
   if (DATA.cycle === 1) {
     statusHtml = `Aktuálny stav: <strong style="color:var(--accent);">Cyklus 1 zo 2</strong>.<br>
-Po skončení 1. cyklu klikni na <strong>"Ukončiť cyklus 1"</strong> — uloží sa snapshot finálnych tabuliek (vždy si ich budeš vedieť pozrieť), aplikujú sa postupy/pády, vygeneruje sa rozpis pre cyklus 2.<br>
+Po skončení 1. cyklu klikni na <strong>"Ukončiť cyklus 1"</strong> — uloží sa snapshot finálnych tabuliek (vždy si ich budeš vedieť pozrieť), aplikujú sa postupy a zostupy, vygeneruje sa rozpis pre cyklus 2.<br>
 <small style="color:var(--text-3);">Tlačidlo si pýta potvrdenie — uvidíš preview kto kam pôjde. Akciu vieš následne vrátiť späť.</small>`;
     buttons += `<button class="btn" onclick="startNextCycle()">Ukončiť cyklus 1 a spustiť cyklus 2 →</button>`;
   } else if (DATA.cycle === 2 && !DATA.playoff.generated) {
@@ -2651,15 +2800,15 @@ async function startNextCycle() {
 
 Aktuálne poradie sa zafrieze ako finálne pre cyklus ${DATA.cycle} (vždy si ho budeš vedieť pozrieť).
 
-Aplikujú sa postupy a pády:
+Aplikujú sa postupy a zostupy:
 
-▼ Z 1. ligy padajú do 2. ligy:
+▼ Z 1. ligy zostupujú do 2. ligy:
    ${standA.slice(-2).map((p,i) => `${standA.length-1+i}. ${p.name}`).join('\n   ')}
 
 ▲ Z 2. ligy postupujú do 1. ligy:
    ${standB.slice(0,2).map((p,i) => `${i+1}. ${p.name}`).join('\n   ')}
 
-▼ Z 2. ligy padajú do 3. ligy:
+▼ Z 2. ligy zostupujú do 3. ligy:
    ${standB.slice(-2).map((p,i) => `${standB.length-1+i}. ${p.name}`).join('\n   ')}
 
 ▲ Z 3. ligy postupujú do 2. ligy:
