@@ -1483,7 +1483,7 @@ function getDemoData() {
     { id: 'p6',  name: 'Ivan Krajíček',       division: 'A', phone: '' },
     { id: 'p7',  name: 'Andrej Procházka',    division: 'A', phone: '' },
     { id: 'p8',  name: 'Anton Kubáň',         division: 'A', phone: '' },
-    // 2. liga (B) – 7 hráčov
+    // 2. liga (B) – 8 hráčov
     { id: 'p9',  name: 'Lukáš Holeša',        division: 'B', phone: '' },
     { id: 'p10', name: 'Ján Zuzík',           division: 'B', phone: '' },
     { id: 'p11', name: 'Marek Meššo',         division: 'B', phone: '' },
@@ -1491,11 +1491,12 @@ function getDemoData() {
     { id: 'p13', name: 'Ludevít Lalík',       division: 'B', phone: '' },
     { id: 'p14', name: 'Dávid Krško',         division: 'B', phone: '' },
     { id: 'p15', name: 'Martin Kočitý',       division: 'B', phone: '' },
+    { id: 'p19', name: 'Lucia Papanová',      division: 'B', phone: '' },
     // 3. liga (C) – 7 hráčov
     { id: 'p16', name: 'Simona Špiriaková',   division: 'C', phone: '' },
     { id: 'p17', name: 'Miroslav Ozimy',      division: 'C', phone: '' },
     { id: 'p18', name: 'Daniel Lokaj',        division: 'C', phone: '' },
-    { id: 'p19', name: 'Lucia Papanová',      division: 'C', phone: '' },
+    { id: 'p23', name: 'Michal Jašurek',      division: 'C', phone: '' },
     { id: 'p20', name: 'Ľubomír Korista',     division: 'C', phone: '' },
     { id: 'p21', name: 'Peter Ďuroška',       division: 'C', phone: '' },
     { id: 'p22', name: 'Štefan Miksák',       division: 'C', phone: '' }
@@ -1794,6 +1795,37 @@ function generateMatchesForCycle(data, cycle) {
       });
     });
   });
+}
+
+/* Bezpečná regenerácia rozpisu – zachová odohraté zápasy ak hráči stále patria
+ * do tej istej ligy. Použije sa po zmene zostavy hráčov v admine. */
+function safeRegenerateCycle(data, cycle) {
+  // Ulož všetky odohraté zápasy v cykle (s sets)
+  const played = data.matches.filter(m =>
+    m.cycle === cycle && m.sets && m.sets.length > 0 && m.type !== 'playoff'
+  );
+  // Vygeneruj nový rozpis podľa aktuálnych hráčov a ich líg
+  generateMatchesForCycle(data, cycle);
+  // Pre každý odohraný zápas: nájdi v novom rozpise zodpovedajúcu dvojicu
+  // (tí istí hráči v tej istej lige) a zachovaj výsledok. Inak sa zápas zahodí.
+  let preserved = 0, dropped = 0;
+  played.forEach(p => {
+    const p1 = data.players.find(x => x.id === p.p1Id);
+    const p2 = data.players.find(x => x.id === p.p2Id);
+    // ak hráči už nie sú v rovnakej lige, zápas zahoď
+    if (!p1 || !p2 || p1.division !== p2.division) { dropped++; return; }
+    const m = data.matches.find(x =>
+      x.cycle === cycle && x.division === p1.division && x.type !== 'playoff' &&
+      ((x.p1Id === p.p1Id && x.p2Id === p.p2Id) || (x.p1Id === p.p2Id && x.p2Id === p.p1Id))
+    );
+    if (m) {
+      const swap = m.p1Id !== p.p1Id;
+      m.sets = swap ? p.sets.map(s => [s[1], s[0]]) : p.sets;
+      m.date = p.date;
+      preserved++;
+    } else dropped++;
+  });
+  return { preserved, dropped };
 }
 
 /* ---------- VÝPOČTY ---------- */
@@ -2744,24 +2776,25 @@ Po skončení všetkých zápasov klikni na <strong>"Spustiť play-off"</strong>
     buttons += `<button class="btn secondary" onclick="resetPlayoff()">Zrušiť play-off</button>`;
   }
   buttons += `<button class="btn secondary" onclick="regenerateSchedule()">Pre-generovať rozpis cyklu ${DATA.cycle}</button>`;
+  buttons += `<button class="btn secondary" onclick="downloadSchedule(1)">⬇ Stiahnuť rozpis cyklu 1</button>`;
+  if (DATA.cycle >= 2 || (DATA.matches.some(m => m.cycle === 2))) {
+    buttons += `<button class="btn secondary" onclick="downloadSchedule(2)">⬇ Stiahnuť rozpis cyklu 2</button>`;
+  }
 
   status.innerHTML = statusHtml;
   wrap.innerHTML = buttons;
 }
 function addNewPlayer() {
-  if (!isLoggedIn()) return;
-  DATA.players.push({ id: 'p' + Date.now(), name: 'Nový hráč', division: 'C' });
-  renderAdminPlayers();
-  showToast('Hráč pridaný (nezabudni uložiť a pre-generovať rozpis)');
+  return addNewPlayerAndRegenerate();
 }
 function removePlayer(id) {
-  if (!isLoggedIn()) return;
-  if (!confirm('Naozaj odstrániť hráča? Jeho zápasy zostanú v histórii.')) return;
-  DATA.players = DATA.players.filter(p => p.id !== id);
-  renderAdminPlayers();
+  return removePlayerAndRegenerate(id);
 }
 async function savePlayers() {
   if (!isLoggedIn()) return;
+  // Zaznamenaj pôvodné divízie pre detekciu zmien
+  const before = {};
+  DATA.players.forEach(p => before[p.id] = p.division);
   document.querySelectorAll('.player-row').forEach(row => {
     const id = row.dataset.id;
     const player = DATA.players.find(p => p.id === id);
@@ -2770,7 +2803,39 @@ async function savePlayers() {
     player.phone = (row.querySelector('[data-field="phone"]')?.value || '').trim();
     player.division = row.querySelector('[data-field="division"]').value;
   });
-  await saveData(); showToast('Hráči uložení'); render();
+  // Detekuj zmenu zostavy – ak sa zmenila divízia hociktorého hráča, regeneruj rozpis
+  const divisionChanged = DATA.players.some(p => before[p.id] && before[p.id] !== p.division);
+  let toastMsg = 'Hráči uložení';
+  if (divisionChanged) {
+    const r = safeRegenerateCycle(DATA, DATA.cycle);
+    toastMsg = `Hráči uložení a rozpis prepočítaný (zachovaných ${r.preserved} výsledkov`;
+    if (r.dropped > 0) toastMsg += `, zahodených ${r.dropped} ktoré už nedávajú zmysel`;
+    toastMsg += ')';
+  }
+  await saveData();
+  showToast(toastMsg);
+  render();
+}
+
+/* Auto-regenerácia po pridaní nového hráča */
+async function addNewPlayerAndRegenerate() {
+  if (!isLoggedIn()) return;
+  const newId = 'p' + Date.now();
+  DATA.players.push({ id: newId, name: 'Nový hráč', division: 'C', phone: '' });
+  renderAdminPlayers();
+  showToast('Hráč pridaný — uprav meno, ligu a klikni "Uložiť zmeny"');
+}
+
+/* Auto-regenerácia po odstránení hráča */
+async function removePlayerAndRegenerate(id) {
+  if (!isLoggedIn()) return;
+  if (!confirm('Naozaj odstrániť hráča? Jeho odohraté zápasy zostanú v histórii, ale rozpis sa prepočíta.')) return;
+  DATA.players = DATA.players.filter(p => p.id !== id);
+  // Vymaž jeho budúce neodohraté zápasy
+  const r = safeRegenerateCycle(DATA, DATA.cycle);
+  await saveData();
+  render();
+  showToast(`Hráč odstránený, rozpis prepočítaný (zachovaných ${r.preserved} výsledkov)`);
 }
 function saveDeadline() {
   if (!isLoggedIn()) return;
@@ -3137,6 +3202,68 @@ function setupFirestoreListener() {
     setSync('error', 'offline');
   });
 }
+function downloadSchedule(cycle) {
+  if (!cycle) cycle = DATA.cycle;
+  const matches = DATA.matches.filter(m => m.cycle === cycle && m.type !== 'playoff')
+    .sort((a, b) => {
+      if (a.division !== b.division) return a.division.localeCompare(b.division);
+      if (a.round !== b.round) return (a.round || 0) - (b.round || 0);
+      return 0;
+    });
+  if (matches.length === 0) { showToast('Žiadne zápasy v cykle ' + cycle, 'error'); return; }
+
+  const dl = DATA.cycleDeadlines?.[cycle];
+  const dlLine = dl ? `Termín odohrania cyklu: ${formatDate(dl)}\n` : '';
+
+  let text = `═══════════════════════════════════════════════════════\n`;
+  text += `   SPOJENÁ TENISOVÁ LIGA — ROZPIS CYKLU ${cycle} / ${DATA.seasonCycles}\n`;
+  text += `   Sezóna ${DATA.season}\n`;
+  text += `═══════════════════════════════════════════════════════\n\n`;
+  text += dlLine;
+  text += `Vygenerované: ${new Date().toLocaleString('sk-SK')}\n`;
+  text += `Web: spojenatenisovaliga.sk\n\n`;
+
+  ['A', 'B', 'C'].forEach(div => {
+    const divMatches = matches.filter(m => m.division === div);
+    if (divMatches.length === 0) return;
+    const players = DATA.players.filter(p => p.division === div);
+    text += `\n═══════════════════════════════════════════════════════\n`;
+    text += `   ${divisionLabel(div).toUpperCase()}  (${players.length} hráčov, ${divMatches.length} zápasov)\n`;
+    text += `═══════════════════════════════════════════════════════\n`;
+    text += `Hráči: ${players.map(p => p.name).join(', ')}\n`;
+    const roundDl = DATA.roundDeadlines?.[cycle] || {};
+    let lastRound = null;
+    divMatches.forEach((m, i) => {
+      if (m.round !== lastRound) {
+        text += `\n──── Kolo ${m.round}`;
+        if (roundDl[m.round]) text += `   (do ${formatDate(roundDl[m.round])})`;
+        text += ` ────\n`;
+        lastRound = m.round;
+      }
+      const p1 = playerById(m.p1Id);
+      const p2 = playerById(m.p2Id);
+      const out = calcMatchOutcome(m);
+      const result = out
+        ? ` → ${out.sets1}:${out.sets2}  (${m.sets.map(s => s[0]+':'+s[1]).join(', ')})`
+        : '';
+      const date = m.date ? `  [${formatDate(m.date)}]` : '';
+      text += `  ${(p1?.name || '?').padEnd(22)} vs ${(p2?.name || '?').padEnd(22)}${result}${date}\n`;
+    });
+  });
+
+  text += `\n═══════════════════════════════════════════════════════\n`;
+  text += `Spolu: ${matches.length} zápasov  ·  odohraných: ${matches.filter(m => m.sets && m.sets.length > 0).length}\n`;
+
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `STL-rozpis-cyklus-${cycle}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast(`Rozpis cyklu ${cycle} stiahnutý`);
+}
+
 function exportData() {
   const blob = new Blob([JSON.stringify(DATA, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
