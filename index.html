@@ -144,6 +144,107 @@
     box-shadow: 0 4px 12px rgba(168, 225, 12, 0.25);
   }
 
+  /* ===== SUB-TABS (filter líg / rozsahu) ===== */
+  .subtabs {
+    display: flex;
+    gap: 5px;
+    margin-bottom: 18px;
+    background: var(--card-2);
+    padding: 5px;
+    border-radius: 11px;
+    border: 1px solid var(--border);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .subtab {
+    flex: 1 0 auto;
+    min-width: 72px;
+    padding: 9px 14px;
+    background: transparent;
+    border: none;
+    color: var(--text-2);
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.15s;
+    font-family: inherit;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+  }
+  .subtab:hover { color: var(--text); }
+  .subtab.active {
+    background: var(--card);
+    color: var(--text);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.45);
+  }
+  .subtab-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px; height: 20px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 800;
+  }
+
+  /* ===== KOLO ACCORDION (rozpis) ===== */
+  .kolo {
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    background: var(--card);
+  }
+  .kolo-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+  }
+  .kolo-head:hover { background: var(--card-2); }
+  .kolo-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    font-size: 14px;
+    flex-wrap: wrap;
+  }
+  .kolo-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .kolo-progress {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-2);
+    background: var(--card-2);
+    padding: 3px 9px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .kolo-progress.done { color: var(--green); background: rgba(34,197,94,0.12); }
+  .kolo-chevron { color: var(--text-2); transition: transform 0.2s; flex-shrink: 0; }
+  .kolo.open .kolo-chevron { transform: rotate(180deg); }
+  .kolo-body { display: none; border-top: 1px solid var(--border); }
+  .kolo.open .kolo-body { display: block; }
+  @media (max-width: 600px) {
+    .subtab { min-width: 0; padding: 9px 7px; font-size: 12px; gap: 5px; }
+    .subtab-tag { width: 18px; height: 18px; font-size: 10px; }
+    .kolo-head { padding: 12px; }
+    .kolo-title { font-size: 13px; }
+  }
+
   /* ===== SECTIONS ===== */
   section.view { display: none; animation: fadeIn 0.25s ease; }
   section.view.active { display: block; }
@@ -594,6 +695,13 @@
   }
   .contact-phone:hover { background: var(--accent); color: #0a0a0a; }
   .contact-phone.empty { color: var(--text-3); border-style: dashed; }
+  .contact-phone { flex-shrink: 0; white-space: nowrap; }
+  @media (max-width: 600px) {
+    /* Telefón na samostatný riadok pod menom — nech sa mená neorezávajú */
+    .contact-card { flex-wrap: wrap; }
+    .contact-info { flex: 1 1 auto; }
+    .contact-phone { flex: 1 1 100%; justify-content: center; margin-top: 4px; }
+  }
 
   /* ===== INFO ===== */
   .info-grid {
@@ -1119,6 +1227,7 @@
         <p>Chronologický zoznam odohraných zápasov</p>
       </div>
     </div>
+    <div id="resultsSubtabs"></div>
     <div class="card">
       <div id="resultsContainer"></div>
     </div>
@@ -1140,9 +1249,10 @@
     <div class="view-header">
       <div>
         <h2>Štatistiky ligy</h2>
-        <p>Celkové čísla a najlepší hráči naprieč všetkými cyklami</p>
+        <p id="statsSubtitle">Celkové čísla a najlepší hráči naprieč všetkými cyklami</p>
       </div>
     </div>
+    <div id="statsSubtabs"></div>
     <div class="stat-grid" id="statGrid"></div>
 
     <h3 style="font-size:16px; margin: 20px 0 12px; color:var(--text-2); text-transform:uppercase; letter-spacing:1px;">Lídri kategórií</h3>
@@ -1493,6 +1603,10 @@ let PHOTO_QUEUE = [];
 /* States pre prehliadanie tabuliek/rozpisu (cyklus / sezóna) */
 let standingsMode = 'season'; // 'season' alebo 1, 2
 let scheduleCycle = 1;
+let scheduleDiv = 'A';            // vybraná liga v rozpise
+const scheduleOpenKola = {};      // `${cycle}|${div}|${round}` -> bool (manuálne rozkliknuté kolá)
+let resultsDiv = 'all';           // filter ligy vo výsledkoch
+let statsScope = 'all';           // rozsah štatistík: 'all' | 'A' | 'B' | 'C'
 
 /* ---------- DEMO DÁTA — STL 2026 ---------- */
 function getDemoData() {
@@ -1921,9 +2035,9 @@ function calcStandings(division, cycleFilter) {
   return arr;
 }
 
-function calcAllPlayerStats() {
+function calcAllPlayerStats(divFilter) {
   const stats = {};
-  DATA.players.forEach(p => {
+  DATA.players.filter(p => !divFilter || p.division === divFilter).forEach(p => {
     stats[p.id] = {
       id: p.id, name: p.name, division: p.division,
       played: 0, wins: 0, losses: 0,
@@ -1935,7 +2049,7 @@ function calcAllPlayerStats() {
   });
   // Všetky zápasy (vrátane play-off)
   const allMatches = [...DATA.matches, ...DATA.playoff.matches]
-    .filter(m => m.sets && m.sets.length > 0)
+    .filter(m => m.sets && m.sets.length > 0 && (!divFilter || m.division === divFilter))
     .sort((a, b) => (a.date || '').localeCompare(b.date || ''));
   const streakState = {};
   Object.keys(stats).forEach(id => streakState[id] = { type: null, count: 0, lW: 0, lL: 0 });
@@ -2235,79 +2349,131 @@ function renderSchedule() {
     const days = daysUntil(dl);
     sub.innerHTML = `Termín odohrania <strong>cyklu ${scheduleCycle}</strong>: <strong style="color:var(--accent);">${formatDate(dl)}</strong> ${days >= 0 ? `(ostáva ${days} ${dayWord(days)})` : `<strong style="color:var(--red);">(po termíne ${-days} ${dayWord(-days)})</strong>`}`;
   } else {
-    sub.textContent = `Cyklus ${scheduleCycle} · Klikni na zápas a pridaj výsledok (admin)`;
+    sub.textContent = `Vyber ligu a kolo. ${isLoggedIn() ? 'Klikni na zápas a pridaj výsledok.' : ''}`;
   }
-  ['A', 'B', 'C'].forEach(div => {
-    const matches = DATA.matches
-      .filter(m => m.division === div && m.cycle === scheduleCycle && m.type !== 'playoff')
-      .sort((a, b) => (a.round || 0) - (b.round || 0));
-    if (matches.length === 0) return;
-    const playedCount = matches.filter(m => m.sets && m.sets.length > 0).length;
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `
-      <div class="card-header">
-        <div class="card-title">
-          <span class="division-tag div-${div}">${divisionShort(div)}</span>
-          <span>${divisionLabel(div)}</span>
+
+  // Sub-taby líg
+  const divs = ['A', 'B', 'C'].filter(d =>
+    DATA.matches.some(m => m.division === d && m.cycle === scheduleCycle && m.type !== 'playoff'));
+  if (divs.length === 0) {
+    wrap.innerHTML = '<div class="empty"><div class="empty-icon">📋</div>Pre tento cyklus zatiaľ nie je rozpis.</div>';
+    return;
+  }
+  if (!divs.includes(scheduleDiv)) scheduleDiv = divs[0];
+  const subtabs = document.createElement('div');
+  subtabs.className = 'subtabs';
+  subtabs.innerHTML = divs.map(d => {
+    const total = DATA.matches.filter(m => m.division === d && m.cycle === scheduleCycle && m.type !== 'playoff').length;
+    const played = DATA.matches.filter(m => m.division === d && m.cycle === scheduleCycle && m.type !== 'playoff' && m.sets && m.sets.length > 0).length;
+    return `<button class="subtab ${d === scheduleDiv ? 'active' : ''}" onclick="setScheduleDiv('${d}')">
+      <span class="subtab-tag div-${d}">${divisionShort(d)}</span> ${divisionLabel(d)}
+      <span style="color:var(--text-3); font-weight:600; font-size:11px;">${played}/${total}</span>
+    </button>`;
+  }).join('');
+  wrap.appendChild(subtabs);
+
+  // Zápasy vybranej ligy, zoskupené po kolách
+  const div = scheduleDiv;
+  const matches = DATA.matches
+    .filter(m => m.division === div && m.cycle === scheduleCycle && m.type !== 'playoff')
+    .sort((a, b) => (a.round || 0) - (b.round || 0));
+  const rounds = [...new Set(matches.map(m => m.round))].sort((a, b) => a - b);
+  // Predvolene otvor prvé kolo s neodohraným zápasom (inak posledné)
+  let defaultOpen = rounds[rounds.length - 1];
+  for (const r of rounds) {
+    if (matches.some(m => m.round === r && !(m.sets && m.sets.length > 0))) { defaultOpen = r; break; }
+  }
+
+  const list = document.createElement('div');
+  rounds.forEach(r => {
+    const rMatches = matches.filter(m => m.round === r);
+    const played = rMatches.filter(m => m.sets && m.sets.length > 0).length;
+    const allPlayed = played === rMatches.length;
+    const key = `${scheduleCycle}|${div}|${r}`;
+    const isOpen = (key in scheduleOpenKola) ? scheduleOpenKola[key] : (r === defaultOpen);
+    const roundDl = DATA.roundDeadlines?.[scheduleCycle]?.[r];
+    let dlHtml = '';
+    if (roundDl) {
+      const days = daysUntil(roundDl);
+      let cls = days < 0 ? 'late' : (days <= 3 ? 'warn' : '');
+      dlHtml = `<span class="round-header-deadline ${cls}">do ${formatDate(roundDl)}${days >= 0 ? ` · ${days} ${dayWord(days)}` : ` · po termíne`}</span>`;
+    }
+    const kolo = document.createElement('div');
+    kolo.className = 'kolo' + (isOpen ? ' open' : '');
+    kolo.innerHTML = `
+      <div class="kolo-head" onclick="toggleKolo(this,'${key}')">
+        <div class="kolo-title"><span>Kolo ${r}</span>${dlHtml}</div>
+        <div class="kolo-meta">
+          <span class="kolo-progress ${allPlayed ? 'done' : ''}">${allPlayed ? '✓ ' : ''}${played}/${rMatches.length}</span>
+          <svg class="kolo-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
         </div>
-        <div style="color:var(--text-2); font-size:13px;">${playedCount} / ${matches.length} odohraných</div>
       </div>
-      <div id="sched-${div}"></div>
+      <div class="kolo-body">${rMatches.map(m => scheduleMatchRow(m)).join('')}</div>
     `;
-    wrap.appendChild(card);
-    const inner = card.querySelector(`#sched-${div}`);
-    let lastRound = null;
-    matches.forEach(m => {
-      if (m.round !== lastRound) {
-        const rh = document.createElement('div');
-        rh.style.cssText = 'padding:10px 12px; color:var(--text-2); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid var(--border); display:flex; align-items:center;';
-        const roundDl = DATA.roundDeadlines?.[scheduleCycle]?.[m.round];
-        let deadlineHtml = '';
-        if (roundDl) {
-          const days = daysUntil(roundDl);
-          let cls = '';
-          if (days < 0) cls = 'late';
-          else if (days <= 3) cls = 'warn';
-          deadlineHtml = `<span class="round-header-deadline ${cls}">do ${formatDate(roundDl)}${days >= 0 ? ` · ${days} ${dayWord(days)}` : ` · po termíne`}</span>`;
-        }
-        rh.innerHTML = `Kolo ${m.round} ${deadlineHtml}`;
-        inner.appendChild(rh);
-        lastRound = m.round;
-      }
-      const out = calcMatchOutcome(m);
-      const p1 = playerById(m.p1Id), p2 = playerById(m.p2Id);
-      const row = document.createElement('div');
-      const canEdit = isLoggedIn();
-      row.className = 'match-row ' + (out ? 'played' : (canEdit ? 'pending' : 'pending locked'));
-      if (canEdit) row.onclick = () => openResultModal(m.id);
-      const winnerCls1 = out ? (out.winnerIs1 ? 'winner' : 'loser') : '';
-      const winnerCls2 = out ? (!out.winnerIs1 ? 'winner' : 'loser') : '';
-      row.innerHTML = `
-        <div class="player-side left">
-          <div class="${winnerCls1}">${escapeHtml(p1?.name || '?')}</div>
-        </div>
-        ${out
-          ? `<div class="score-box">${out.sets1} : ${out.sets2}<div class="games-detail">${m.sets.map(s => `${s[0]}:${s[1]}`).join(' · ')}</div></div>`
-          : `<div class="add-btn ${canEdit ? '' : 'locked'}">${canEdit ? '+ pridať' : 'neodohraný'}</div>`}
-        <div class="player-side right">
-          <div class="${winnerCls2}">${escapeHtml(p2?.name || '?')}</div>
-        </div>
-      `;
-      inner.appendChild(row);
-    });
+    list.appendChild(kolo);
   });
+  wrap.appendChild(list);
 }
+
+function scheduleMatchRow(m) {
+  const out = calcMatchOutcome(m);
+  const p1 = playerById(m.p1Id), p2 = playerById(m.p2Id);
+  const canEdit = isLoggedIn();
+  const cls = 'match-row ' + (out ? 'played' : (canEdit ? 'pending' : 'pending locked'));
+  const click = canEdit ? ` onclick="openResultModal('${m.id}')" style="cursor:pointer;"` : '';
+  const w1 = out ? (out.winnerIs1 ? 'winner' : 'loser') : '';
+  const w2 = out ? (!out.winnerIs1 ? 'winner' : 'loser') : '';
+  return `<div class="${cls}"${click}>
+    <div class="player-side left"><div class="${w1}">${escapeHtml(p1?.name || '?')}</div></div>
+    ${out
+      ? `<div class="score-box">${out.sets1} : ${out.sets2}<div class="games-detail">${m.sets.map(s => `${s[0]}:${s[1]}`).join(' · ')}</div></div>`
+      : `<div class="add-btn ${canEdit ? '' : 'locked'}">${canEdit ? '+ pridať' : 'neodohraný'}</div>`}
+    <div class="player-side right"><div class="${w2}">${escapeHtml(p2?.name || '?')}</div></div>
+  </div>`;
+}
+
+function toggleKolo(headEl, key) {
+  const kolo = headEl.parentElement;
+  const open = kolo.classList.toggle('open');
+  scheduleOpenKola[key] = open;
+}
+
+function setScheduleDiv(d) {
+  scheduleDiv = d;
+  renderSchedule();
+}
+
 function toggleScheduleCycle() {
   scheduleCycle = scheduleCycle === 1 ? 2 : 1;
   renderSchedule();
 }
 
 /* ---------- RENDER: VÝSLEDKY ---------- */
+function setResultsDiv(d) {
+  resultsDiv = d;
+  renderResults();
+}
+
 function renderResults() {
   const wrap = document.getElementById('resultsContainer');
   const all = [...DATA.matches, ...DATA.playoff.matches];
-  const played = all.filter(m => m.sets && m.sets.length > 0);
+  let played = all.filter(m => m.sets && m.sets.length > 0);
+
+  // Sub-taby filtra líg
+  const subWrap = document.getElementById('resultsSubtabs');
+  const divs = ['A', 'B', 'C'].filter(d => played.some(m => m.division === d));
+  if (subWrap) {
+    if (divs.length > 1) {
+      const mk = (val, label, tag) =>
+        `<button class="subtab ${resultsDiv === val ? 'active' : ''}" onclick="setResultsDiv('${val}')">${tag}${label}</button>`;
+      subWrap.innerHTML = mk('all', 'Všetky', '') +
+        divs.map(d => mk(d, divisionLabel(d), `<span class="subtab-tag div-${d}">${divisionShort(d)}</span> `)).join('');
+      subWrap.style.display = '';
+    } else { subWrap.innerHTML = ''; subWrap.style.display = 'none'; }
+  }
+  if (resultsDiv !== 'all' && !divs.includes(resultsDiv)) resultsDiv = 'all';
+  if (resultsDiv !== 'all') played = played.filter(m => m.division === resultsDiv);
+
   played.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
   if (played.length === 0) {
     wrap.innerHTML = '<div class="empty"><div class="empty-icon">🎾</div>Zatiaľ žiadne odohraté zápasy</div>';
@@ -2453,8 +2619,31 @@ function renderBracketMatch(m, playerSeeds) {
 }
 
 /* ---------- RENDER: ŠTATISTIKY ---------- */
+function setStatsScope(s) {
+  statsScope = s;
+  renderStats();
+}
+
 function renderStats() {
-  const allMatches = [...DATA.matches, ...DATA.playoff.matches].filter(m => m.sets && m.sets.length > 0);
+  const scope = statsScope;
+  const divFilter = scope === 'all' ? null : scope;
+
+  // Sub-taby rozsahu (Súhrn / jednotlivé ligy)
+  const subWrap = document.getElementById('statsSubtabs');
+  const divs = ['A', 'B', 'C'].filter(d => DATA.players.some(p => p.division === d));
+  if (subWrap) {
+    const mk = (val, label, tag) =>
+      `<button class="subtab ${scope === val ? 'active' : ''}" onclick="setStatsScope('${val}')">${tag}${label}</button>`;
+    subWrap.innerHTML = mk('all', 'Súhrn', '') +
+      divs.map(d => mk(d, divisionLabel(d), `<span class="subtab-tag div-${d}">${divisionShort(d)}</span> `)).join('');
+  }
+  const subtitle = document.getElementById('statsSubtitle');
+  if (subtitle) subtitle.textContent = divFilter
+    ? `Štatistiky pre ${divisionLabel(divFilter)} naprieč všetkými cyklami`
+    : 'Súhrnné čísla a najlepší hráči naprieč všetkými ligami a cyklami';
+
+  const allMatches = [...DATA.matches, ...DATA.playoff.matches]
+    .filter(m => m.sets && m.sets.length > 0 && (!divFilter || m.division === divFilter));
   const totalMatches = allMatches.length;
   const totalSets = allMatches.reduce((s, m) => s + (m.sets?.length || 0), 0);
   const totalGames = allMatches.reduce((s, m) => s + m.sets.reduce((a, set) => a + (set[0]||0) + (set[1]||0), 0), 0);
@@ -2466,7 +2655,7 @@ function renderStats() {
     <div class="stat-card"><div class="stat-label">3-setové bitky</div><div class="stat-value">${tiebreaks}</div></div>
   `;
 
-  const all = calcAllPlayerStats();
+  const all = calcAllPlayerStats(divFilter);
   const leaders = [
     { title: 'Najviac víťazstiev', metric: p => p.wins, format: v => v + ' výhier' },
     { title: 'Najlepšia úspešnosť', metric: p => p.played >= 3 ? p.wins / p.played : -1, format: (v, p) => Math.round(v*100)+'% (' + p.wins + '/' + p.played + ')' },
