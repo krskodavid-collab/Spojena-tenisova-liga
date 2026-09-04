@@ -1984,6 +1984,12 @@ function calcMatchOutcome(match) {
   return { sets1, sets2, games1, games2, pts1, pts2, winnerIs1 };
 }
 
+/* Nasadenie do play-off: konečné poradie CYKLU 2. Hráči s 0 odohranými
+ * zápasmi (kontumácie) do play-off nepostupujú (propozície STL 2026). */
+function playoffSeeding(division) {
+  return calcStandings(division, 2).filter(s => s.played > 0);
+}
+
 function calcStandings(division, cycleFilter) {
   // Ak existuje snapshot pre minulý cyklus, použij ho (mrazené finálne tabuľky)
   if (typeof cycleFilter === 'number' && DATA.cycleHistory?.[cycleFilter]?.finalStandings?.[division]) {
@@ -2083,13 +2089,43 @@ function calcAllPlayerStats(divFilter) {
 }
 
 /* ---------- PLAY-OFF ---------- */
+/* Finálne ligy pre play-off: aplikuje postup/zostup z cyklu 2 (prví 2 hore,
+ * poslední 2 dole) a nasadí hráčov v novej lige podľa ÚROVNE pôvodnej ligy —
+ * zostúpení z vyššej ligy sú nasadení hore, postúpení z nižšej dole (v rámci
+ * skupiny podľa umiestnenia). Hráči s 0 odohranými zápasmi nepostupujú. */
+function finalLeaguesSeeding() {
+  const level = { A: 1, B: 2, C: 3 };
+  const targetDiv = (d, i, n) => {
+    if (d === 'A') return (i >= n - 2) ? 'B' : 'A';        // top ostáva, spodní 2 dole
+    if (d === 'B') return (i < 2) ? 'A' : (i >= n - 2) ? 'C' : 'B';
+    return (i < 2) ? 'B' : 'C';                            // C: horní 2 hore, zvyšok ostáva
+  };
+  const buckets = { A: [], B: [], C: [] };
+  ['A', 'B', 'C'].forEach(d => {
+    const arr = calcStandings(d, 2);
+    const n = arr.length;
+    arr.forEach((s, i) => {
+      if (!(s.played > 0)) return;                         // 0 zápasov = bez play-off
+      const nd = targetDiv(d, i, n);
+      buckets[nd].push({ id: s.id, lvl: level[d], pos: i + 1 });
+    });
+  });
+  const seeds = {};
+  ['A', 'B', 'C'].forEach(d => {
+    buckets[d].sort((a, b) => a.lvl - b.lvl || a.pos - b.pos);
+    seeds[d] = buckets[d].map(x => x.id);
+  });
+  return seeds;
+}
+
 function generatePlayoff() {
   const playoffMatches = [];
+  const seedsByDiv = finalLeaguesSeeding();
   ['A', 'B', 'C'].forEach(div => {
-    const standings = calcStandings(div, 'season');
-    const n = standings.length;
+    const ids = seedsByDiv[div] || [];
+    const n = ids.length;
     if (n < 4) return;
-    const seed = idx => standings[idx]?.id || null; // seed[0] = 1. miesto
+    const seed = idx => ids[idx] || null; // seed[0] = 1. nasadený
 
     if (n >= 8) {
       // 8 hráčov: QF1=1v8, QF2=4v5, QF3=3v6, QF4=2v7
@@ -2147,10 +2183,49 @@ function generatePlayoff() {
         p2Source: { round: 'QF', position: 3 },
         sets: null, date: null
       });
-    } else if (n >= 4) {
-      // Fallback pre 4-6 hráčov
-      const pairs = n === 6 ? [[2,5],[3,4]] : [[0,3],[1,2]];
-      pairs.forEach((pair, i) => {
+    } else if (n === 6) {
+      // 6 hráčov: prví dvaja majú voľný los do SF; QF1=4v5, QF2=3v6
+      [[3,4],[2,5]].forEach((pair, i) => {
+        playoffMatches.push({
+          id: `po-${div}-QF-${i+1}`,
+          cycle: 'po', type: 'playoff', division: div,
+          round: 'QF', position: i+1,
+          p1Id: seed(pair[0]), p2Id: seed(pair[1]),
+          p1Source: null, p2Source: null,
+          sets: null, date: null
+        });
+      });
+      // SF1: 1. miesto vs víťaz QF1; SF2: 2. miesto vs víťaz QF2
+      [[0,1],[1,2]].forEach((cfg, i) => {
+        playoffMatches.push({
+          id: `po-${div}-SF-${i+1}`,
+          cycle: 'po', type: 'playoff', division: div,
+          round: 'SF', position: i+1,
+          p1Id: seed(cfg[0]), p2Id: null,
+          p1Source: null, p2Source: { round: 'QF', position: cfg[1] },
+          sets: null, date: null
+        });
+      });
+    } else if (n === 5) {
+      // 5 hráčov: QF1=4v5; SF1: 1. vs víťaz QF1; SF2: 2. vs 3.
+      playoffMatches.push({
+        id: `po-${div}-QF-1`, cycle: 'po', type: 'playoff', division: div,
+        round: 'QF', position: 1, p1Id: seed(3), p2Id: seed(4),
+        p1Source: null, p2Source: null, sets: null, date: null
+      });
+      playoffMatches.push({
+        id: `po-${div}-SF-1`, cycle: 'po', type: 'playoff', division: div,
+        round: 'SF', position: 1, p1Id: seed(0), p2Id: null,
+        p1Source: null, p2Source: { round: 'QF', position: 1 }, sets: null, date: null
+      });
+      playoffMatches.push({
+        id: `po-${div}-SF-2`, cycle: 'po', type: 'playoff', division: div,
+        round: 'SF', position: 2, p1Id: seed(1), p2Id: seed(2),
+        p1Source: null, p2Source: null, sets: null, date: null
+      });
+    } else if (n === 4) {
+      // 4 hráči: SF1=1v4, SF2=2v3
+      [[0,3],[1,2]].forEach((pair, i) => {
         playoffMatches.push({
           id: `po-${div}-SF-${i+1}`,
           cycle: 'po', type: 'playoff', division: div,
@@ -2172,7 +2247,7 @@ function generatePlayoff() {
       sets: null, date: null
     });
   });
-  DATA.playoff = { generated: true, matches: playoffMatches };
+  DATA.playoff = { generated: true, matches: playoffMatches, seeds: seedsByDiv };
 }
 
 function propagatePlayoff() {
@@ -2536,9 +2611,10 @@ function renderPlayoff() {
     const section = document.createElement('div');
     section.className = 'bracket-section';
 
-    const standings = calcStandings(div, 'season');
+    const seedIds = (DATA.playoff.seeds && DATA.playoff.seeds[div])
+      || playoffSeeding(div).map(s => s.id);
     const playerSeeds = {};
-    standings.forEach((s, i) => playerSeeds[s.id] = i + 1);
+    seedIds.forEach((id, i) => playerSeeds[id] = i + 1);
 
     const finalMatch = matches.find(m => m.round === 'F');
     const champion = finalMatch ? (() => {
@@ -3256,7 +3332,7 @@ function startPlayoff() {
   if (!cycle2Done) {
     if (!confirm('Pozor: Niektoré zápasy 2. cyklu nie sú odohrané. Naozaj chceš spustiť play-off?')) return;
   }
-  if (!confirm('Spustiť play-off? Vygenerujú sa zápasy podľa sezónneho poradia.')) return;
+  if (!confirm('Spustiť play-off? Vygeneruje sa pavúk podľa konečného poradia cyklu 2 (hráči s 0 odohranými zápasmi nepostupujú).')) return;
   generatePlayoff();
   saveData(); render(); showToast('Play-off spustený');
   // Prepni na PO tab
